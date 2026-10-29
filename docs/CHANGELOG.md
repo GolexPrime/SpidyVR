@@ -52,10 +52,14 @@ Virtual Desktop).
   instead: Spider-Man's arms and the HUD panel, by the turn between the two
   (whatever the turn, the picture's own uneven timing shows on one of the
   two), and things close by, by the travel not made up (30 cm at 30 m/s in
-  a 120 Hz frame; much at 3 m, nothing at 100 m). At 72 Hz it felt good in
-  a first, two-minute run. The turn made up there was 2.6 degrees on
-  average (most 28.3): the time from render to display, not pairs shown
-  again. PLAYERS.md tells
+  a 120 Hz frame; much at 3 m, nothing at 100 m). At 72 Hz it felt good,
+  in a two-minute run and then in a 12-minute session (707 s in VR, the
+  switch on throughout): 68 new pairs a second (62 or fewer in a tenth of
+  the seconds), 6% shown twice (4.2 a second, in bursts where the game
+  dips below 72: none in 84 of 710 seconds, more than 5 in 176), 0.007
+  dropped a second. The turn made up was 2.3 degrees on average (most
+  28.6; 962 of about 157,000 frames past the limit): the time from render
+  to display, not pairs shown again. PLAYERS.md tells
   players to pick a rate the game keeps up with.
 - **The report's `flip_reprojection`** (`SpidyReprojectData`, a new export;
   XrData unchanged): frames turned, shown as rendered, passed over (past the
