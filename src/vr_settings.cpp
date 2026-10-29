@@ -237,6 +237,8 @@ template <class V> auto switchOf(Item item, V& v) -> decltype(&v.aimMarkers) {
         return &v.hapticMovement;
     case Item::seated:
         return &v.seated;
+    case Item::flipReprojection:
+        return &v.flipReprojection;
     default:
         return nullptr;
     }
@@ -270,9 +272,9 @@ Values sanitized(Values v) {
     v.automaticHandThreshold = std::clamp(v.automaticHandThreshold, 50, 300);
     return v;
 }
-const std::array<Row, 52>& rows() {
+const std::array<Row, 53>& rows() {
     // The help fits the game's description column beside the rows.
-    static const std::array<Row, 52> all{{
+    static const std::array<Row, 53> all{{
         {Item::none, "WEBS", nullptr, {}},
         {Item::webStyle, "WEB STYLE",
          "Arcade: webs pass lamp posts, signs and cars, and swings stay above the street.", webStyleChoices},
@@ -347,6 +349,8 @@ const std::array<Row, 52>& rows() {
          "Gently bank the view with the body on horizontal momentum wall runs.", {}},
         {Item::eyeAim, "EYE AIM", "Web balls and zips go where your eyes look. Needs a headset with eye tracking.",
          eyeAimChoices},
+        {Item::flipReprojection, "FLIP REPROJECTION",
+         "Flips, spins and smooth turns shown as steadily as head turns.", {}},
         {Item::realisticFlips, "REALISTIC FLIPS",
          "Momentum rotation from arms and webs. FLIPS also enables left-stick steering.", {}},
         {Item::automaticStrength, "ROTATION STRENGTH",
@@ -514,6 +518,7 @@ constexpr TabOnly tabOnly[] = {
     {"height_cm", nullptr, &Values::heightCm},
     {"seated", &Values::seated, nullptr},
     {"eye_aim", nullptr, &Values::eyeAim},
+    {"flip_reprojection", &Values::flipReprojection, nullptr},
 };
 } // namespace
 std::string tabOnlyText(const Values& v) {
