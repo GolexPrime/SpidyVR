@@ -88,6 +88,8 @@ inline constexpr ProfileSetting profileSettings[] = {
     tabOnly("web_slingshot", Item::webSlingshot, &Values::webSlingshot),
     tabOnly("slingshot_speed", Item::slingshotSpeed, 0, 300, &Values::slingshotSpeed),
     tabOnly("better_climbing", Item::betterClimbing, &Values::betterClimbing),
+    tabOnly("two_hand_zip", Item::twoHandZip, &Values::twoHandZip),
+    tabOnly("rope_steering", Item::ropeSteering, &Values::ropeSteering),
     retired("wall_run", 1),
     launcherOption("snap_turn", Item::snapTurn, 0, 90, &SessionOptions::snapTurn),
     launcherOption("smooth_turn", Item::smoothTurn, 0, 360, &SessionOptions::smoothTurn),

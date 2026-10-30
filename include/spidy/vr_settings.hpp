@@ -164,6 +164,11 @@ struct Values {
     // RECORDING SMOOTHING): 0 off; 10 to 100, slower and slower. The
     // headset's view is never smoothed (pull request #46).
     int recordingSmoothing = 0;
+    // Hand gestures on webs (pull request #47): TWO HAND WEB ZIP, both webs
+    // on one spot and both arms pulled back fast launch you at it; HAND ROPE
+    // STEERING, the free hand on your web too pulls sideways to turn the
+    // swing (Swing::allowGestures).
+    bool twoHandZip = false, ropeSteering = false;
     bool operator==(const Values&) const = default;
 };
 inline constexpr int eyeAimShots = 1, eyeAimZips = 2;
@@ -263,8 +268,10 @@ enum class Item : uint8_t {
     swingAssist,
     slingshotSpeed,
     recordingSmoothing,
+    twoHandZip,
+    ropeSteering,
 };
-inline constexpr Item lastItem = Item::recordingSmoothing;
+inline constexpr Item lastItem = Item::ropeSteering;
 // Where a row shows: in the tab; on the pause menu's first page instead,
 // under RESUME: VR VIEW (the user, October 15: "move the VIEW: GAME SCREEN to
 // the first menu (the one with resume)"); or only in the launcher's options:
@@ -287,7 +294,7 @@ struct Row {
     std::span<const char* const> choices{};
     Place place{};
 };
-const std::array<Row, 58>& rows();
+const std::array<Row, 60>& rows();
 // The most choices a row shows (game_menu's buffers): a row with more would
 // lose its last ones.
 inline constexpr size_t maxChoices = 9;

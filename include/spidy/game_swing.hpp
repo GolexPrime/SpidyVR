@@ -231,6 +231,8 @@ static_assert(sizeof(Config) == 64 && sizeof(Hand) == 52 && sizeof(Command) == 2
 // arcade: arcade webs (the VR settings' WEB STYLE: ARCADE; SwingConfig::
 // arcade). Version 6 (settingsBytesV6) ends before it and leaves the webs'
 // style as it is.
+// Version 18 appends ropeSteering and version 17 twoHandZip, both off by
+// default: the hand gestures of Swing::allowGestures.
 // Version 16 appends slingshotSpeed, m/s: 0 the slingshot's launch as before,
 // under maxSpeed; 20 to 300 its own (Swing::setSlingshotSpeed).
 // Version 15 appends swingAssist (off by default): flying at something,
@@ -247,7 +249,7 @@ static_assert(sizeof(Config) == 64 && sizeof(Hand) == 52 && sizeof(Command) == 2
 // Version 8 appends handClimb without changing the upstream phone or arcade
 // fields. Older official settings keep their original layout and meaning.
 struct Settings {
-    uint32_t magic = 0x53575354, version = 16, bytes = sizeof(Settings), grab = 1;
+    uint32_t magic = 0x53575354, version = 18, bytes = sizeof(Settings), grab = 1;
     float maxSpeed = 32;
     uint32_t airWebs = 1;
     float gravity = 6;
@@ -264,12 +266,14 @@ struct Settings {
     uint32_t softRelease{};
     uint32_t swingAssist{};
     float slingshotSpeed{};
+    uint32_t twoHandZip{};
+    uint32_t ropeSteering{};
 };
 constexpr uint32_t settingsBytesV3 = 28, settingsBytesV4 = 32, settingsBytesV5 = 36, settingsBytesV6 = 40,
                    settingsBytesV7 = 44, settingsBytesV8 = 48, settingsBytesV9 = 52, settingsBytesV10 = 56,
                    settingsBytesV11 = 60, settingsBytesV12 = 64, settingsBytesV13 = 68,
-                   settingsBytesV14 = 72, settingsBytesV15 = 76;
-static_assert(sizeof(Settings) == 80 && offsetof(Settings, walls) == settingsBytesV3 &&
+                   settingsBytesV14 = 72, settingsBytesV15 = 76, settingsBytesV16 = 80, settingsBytesV17 = 84;
+static_assert(sizeof(Settings) == 88 && offsetof(Settings, walls) == settingsBytesV3 &&
               offsetof(Settings, physical) == settingsBytesV4 &&
               offsetof(Settings, noBlows) == settingsBytesV5 &&
               offsetof(Settings, arcade) == settingsBytesV6 &&
@@ -281,7 +285,9 @@ static_assert(sizeof(Settings) == 80 && offsetof(Settings, walls) == settingsByt
               offsetof(Settings, elasticWeb) == settingsBytesV12 &&
               offsetof(Settings, softRelease) == settingsBytesV13 &&
               offsetof(Settings, swingAssist) == settingsBytesV14 &&
-              offsetof(Settings, slingshotSpeed) == settingsBytesV15);
+              offsetof(Settings, slingshotSpeed) == settingsBytesV15 &&
+              offsetof(Settings, twoHandZip) == settingsBytesV16 &&
+              offsetof(Settings, ropeSteering) == settingsBytesV17);
 // SpidySlingshotSample: charge in [0, 1], zero after cancel or release.
 struct SlingshotData {
     uint32_t magic = 0x53534c47, version = 1, bytes = sizeof(SlingshotData);
@@ -406,13 +412,16 @@ inline bool validSettings(const Settings& s) {
          (s.version == 13 && s.bytes == settingsBytesV13) ||
          (s.version == 14 && s.bytes == settingsBytesV14) ||
          (s.version == 15 && s.bytes == settingsBytesV15) ||
-         (s.version == 16 && s.bytes == sizeof(Settings))) &&
+         (s.version == 16 && s.bytes == settingsBytesV16) ||
+         (s.version == 17 && s.bytes == settingsBytesV17) ||
+         (s.version == 18 && s.bytes == sizeof(Settings))) &&
         s.grab <= 1 && std::isfinite(s.maxSpeed) && s.maxSpeed > 0 && s.maxSpeed <= motionSpeedLimit &&
         s.airWebs <= 1 && std::isfinite(s.gravity) && s.gravity >= 0 && s.gravity <= maxGravity &&
         s.walls <= 4 && s.physical <= 1 && s.noBlows <= 3 && s.arcade <= 1 && s.handClimb <= 1 &&
         s.webSlingshot <= 1 && s.betterClimbing <= 1 && s.combatVisuals <= 1 && s.smartAnchor <= 1 &&
         s.elasticWeb <= 3 && s.softRelease <= 3 && s.swingAssist <= 1 && std::isfinite(s.slingshotSpeed) &&
-        (s.slingshotSpeed == 0 || (s.slingshotSpeed >= 20 && s.slingshotSpeed <= 300));
+        (s.slingshotSpeed == 0 || (s.slingshotSpeed >= 20 && s.slingshotSpeed <= 300)) && s.twoHandZip <= 1 &&
+        s.ropeSteering <= 1;
 }
 static_assert(sizeof(WebState) == 28 && sizeof(Data) == 272 && offsetof(Data, wall) == 240);
 // The player is in the air: Spidy's own flight, or the game's jump or fall,

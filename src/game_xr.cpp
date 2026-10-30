@@ -1320,6 +1320,8 @@ DWORD WINAPI run(void*) {
             s.softRelease = static_cast<uint32_t>(values.softRelease);
             s.swingAssist = values.swingAssist;
             s.slingshotSpeed = static_cast<float>(values.slingshotSpeed);
+            s.twoHandZip = values.twoHandZip;
+            s.ropeSteering = values.ropeSteering;
             sentSwingSettings = s;
             swingSettingsSent = true;
             // A hand-over owns the walls while it lasts; the player's own

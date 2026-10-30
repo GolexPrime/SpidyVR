@@ -231,6 +231,10 @@ template <class V> auto switchOf(Item item, V& v) -> decltype(&v.aimMarkers) {
         return &v.smartAnchor;
     case Item::swingAssist:
         return &v.swingAssist;
+    case Item::twoHandZip:
+        return &v.twoHandZip;
+    case Item::ropeSteering:
+        return &v.ropeSteering;
     case Item::combatVisuals:
         return &v.combatVisuals;
     case Item::aimMarkers:
@@ -308,9 +312,9 @@ Values sanitized(Values v) {
     v.automaticHandThreshold = std::clamp(v.automaticHandThreshold, 50, 300);
     return v;
 }
-const std::array<Row, 58>& rows() {
+const std::array<Row, 60>& rows() {
     // The help fits the game's description column beside the rows.
-    static const std::array<Row, 58> all{{
+    static const std::array<Row, 60> all{{
         {Item::none, "WEBS", nullptr, {}},
         {Item::webStyle, "WEB STYLE",
          "Arcade: webs pass lamp posts, signs and cars, and swings stay above the street.", webStyleChoices},
@@ -345,6 +349,10 @@ const std::array<Row, 58>& rows() {
          "BETTER CLIMBING",
          "Take one web in both hands, then pull hand over hand to keep climbing it.",
          {}},
+        {Item::twoHandZip, "TWO HAND WEB ZIP",
+         "Both webs on one spot: pull both arms back fast to launch at it.", {}},
+        {Item::ropeSteering, "HAND ROPE STEERING",
+         "Hold your web with the free hand too and pull sideways to turn your swing.", {}},
         {Item::none, "COMFORT", nullptr, {}},
         {Item::snapTurn, "SNAP TURN", "How far a flick of the right stick turns you. Off: no snap turning.",
          snapChoices},
@@ -617,6 +625,8 @@ constexpr TabOnly tabOnly[] = {
     {"swing_assist", &Values::swingAssist, nullptr},
     {"slingshot_speed", nullptr, &Values::slingshotSpeed},
     {"recording_smoothing", nullptr, &Values::recordingSmoothing},
+    {"two_hand_zip", &Values::twoHandZip, nullptr},
+    {"rope_steering", &Values::ropeSteering, nullptr},
 };
 } // namespace
 std::string tabOnlyText(const Values& v) {

@@ -572,6 +572,26 @@ class Swing {
     float speedLimit() const {
         return slingshotFlight_ ? std::max(config_.maxSpeed, slingshotSpeed_) : config_.maxSpeed;
     }
+    // Hand gestures on webs, each off unless switched on (pull request #47):
+    // zip, two webs on one spot and both arms pulled back fast toward it
+    // launch the player at it, harder for a faster pull; steering, the free
+    // hand on the same strand turns the swing's momentum by pulling
+    // sideways, making no speed. Switching either clears what is queued.
+    void allowGestures(bool zip, bool steering) {
+        if (twoHandZip_ != zip || ropeSteering_ != steering)
+            resetGestures();
+        twoHandZip_ = zip;
+        ropeSteering_ = steering;
+    }
+    bool gestureTakeoff() const {
+        return gestureTakeoff_;
+    }
+    Vec3 gestureLaunch() const {
+        return gestureLaunch_;
+    }
+    bool gesturesEnabled() const {
+        return twoHandZip_ || ropeSteering_;
+    }
     const SwingConfig& config() const {
         return config_;
     }
@@ -600,6 +620,14 @@ class Swing {
     bool climbTakeoff_{};
     float slingshotSpeed_{};
     bool slingshotFlight_{}, slingshotAirborne_{};
+    bool twoHandZip_{}, ropeSteering_{};
+    bool gestureSample_{}, zipUsed_{}, gestureTakeoff_{};
+    Vec3 gesturePrevious_[2]{}, gestureLaunch_{};
+    uint64_t gestureStrands_[2]{};
+    float zipGestureBlock_{}, gestureYaw_{}, zipPull_[2]{}, zipWindow_{};
+    void resetGestures();
+    void gestures(float dt, const Input&, const WorldQueries&);
+    bool twoHandTarget() const;
     struct HandState {
         // held: grip squeezed, with release hysteresis. A web shoots only on the
         // press that sets it, so a lost web never re-fires while the grip stays held.

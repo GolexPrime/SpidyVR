@@ -1087,9 +1087,126 @@ int main() {
         s.slingshotSpeed = 301;
         check(!game_swing::validSettings(s), "a launch over 300 m/s accepted");
     });
+    struct TwinZipTest {
+        TestWorld world;
+        Swing solver{inert()};
+        Input in;
+        Body body{{}, {}, false};
+        unsigned zips{};
+        TwinZipTest(bool enabled = true) {
+            world.anchor = {0, 0, -30};
+            solver.allowGestures(enabled, false);
+            for (int i = 0; i < 2; ++i) {
+                in.hands[i].tracked = true;
+                in.hands[i].grip = 1;
+                in.hands[i].gripRelativeToHead = {i ? .2f : -.2f, 0, -.35f};
+                in.hands[i].aim = {{i ? .2f : -.2f, 0, 0},
+                                   arc({0, 0, -1}, normalized(world.anchor - Vec3{i ? .2f : -.2f, 0, 0}))};
+            }
+            in.look = {0, 0, -1};
+            step();
+        }
+        void step(float inputTime = .02f) {
+            const auto result = solver.predictNativeStep(.02f, in, world, body, inputTime);
+            check(result.valid, "zip prediction failed");
+            for (const auto& e : solver.events())
+                zips += e.kind == EventKind::Zip;
+            body = {result.target, result.velocity, body.grounded};
+        }
+        void pull(float distance) {
+            for (auto& h : in.hands)
+                h.gripRelativeToHead.z += distance;
+            step();
+        }
+    };
+    test("sideways rope steering turns existing momentum only while sharing a strand", [] {
+        TestWorld world;
+        Swing on(inert()), off(inert());
+        on.allowGestures(false, true);
+        Input input = aimed();
+        input.hands[0].trigger = 0;
+        input.hands[1] = {input.hands[0].aim, {0, .3f, 0}, true, 0, 0};
+        Body a{{}, {0, 0, -10}, false}, b = a;
+        auto step = [&] {
+            const auto x = on.predictNativeStep(.01f, input, world, a),
+                       y = off.predictNativeStep(.01f, input, world, b);
+            a = {x.target, x.velocity, false};
+            b = {y.target, y.velocity, false};
+        };
+        step();
+        input.hands[1].grip = 1;
+        step();
+        check(on.shared(), "free hand did not take the rope");
+        for (int i = 0; i < 10; ++i) {
+            input.hands[1].gripRelativeToHead.x += .02f;
+            step();
+        }
+        check(a.velocity.x > b.velocity.x + 1, "sideways pull did not steer");
+        check(length(a.velocity) < 10.1f, "rope steering manufactured speed");
+        input.hands[1].grip = 0;
+        step();
+        check(!on.shared(), "released hand kept steering grip");
+    });
+    test("turning gestures OFF clears a queued launch and does not replay it", [] {
+        TwinZipTest state;
+        state.body.grounded = true;
+        for (int i = 0; i < 3; ++i)
+            state.pull(.05f);
+        check(state.solver.gestureTakeoff(), "test did not queue a takeoff");
+        state.solver.allowGestures(false, false);
+        check(!state.solver.gestureTakeoff(), "OFF retained a queued launch");
+        near(length(state.solver.gestureLaunch()), 0);
+        const unsigned before = state.zips;
+        for (int i = 0; i < 20; ++i)
+            state.step();
+        check(state.zips == before, "OFF replayed the launch");
+    });
+    test("two hand zip rejects one-arm, slow, tracking-gap and yaw-change gestures", [] {
+        TwinZipTest one, slow, gap, yaw;
+        for (int i = 0; i < 8; ++i) {
+            one.in.hands[0].gripRelativeToHead.z += .04f;
+            one.step();
+            slow.pull(.01f);
+        }
+        check(one.zips == 0 && slow.zips == 0, "unintentional arm motion zipped");
+        gap.pull(.05f);
+        gap.in.hands[1].tracked = false;
+        gap.step();
+        gap.in.hands[1].tracked = true;
+        gap.pull(.3f);
+        check(gap.zips == 0, "tracking gap created a zip");
+        yaw.pull(.05f);
+        yaw.in.trackingYaw = .5f;
+        yaw.pull(.2f);
+        check(yaw.zips == 0, "snap turn created a zip");
+    });
+    test("two hand zip uses both retractions once and scales with the arm speed", [] {
+        TwinZipTest medium, strong;
+        for (int i = 0; i < 5; ++i)
+            medium.pull(.028f);
+        for (int i = 0; i < 3; ++i)
+            strong.pull(.05f);
+        check(medium.zips == 1 && strong.zips == 1, "two-hand gesture missed or duplicated zip");
+        check(-strong.body.velocity.z > -medium.body.velocity.z + 3, "stronger pull did not launch harder");
+        for (int i = 0; i < 30; ++i)
+            strong.step(0);
+        check(strong.zips == 1, "repeated input relaunched the zip");
+    });
+    test("hand gestures: two switches, off by default, kept in spidy_vr.ini", [] {
+        using namespace vr_settings;
+        for (Item item : {Item::twoHandZip, Item::ropeSteering}) {
+            Values v;
+            check(defaultChoice(item) == 0, "a gesture on by default");
+            check(choose(item, 1, v) && choice(item, withTabOnly({}, tabOnlyText(v))) == 1, "not kept");
+        }
+        game_swing::Settings s;
+        check(!s.twoHandZip && !s.ropeSteering, "a gesture on in the swing's settings");
+        s.ropeSteering = 2;
+        check(!game_swing::validSettings(s), "invalid switch accepted");
+    });
     test("slingshot settings append to the old wire format and default off", [] {
         game_swing::Settings s;
-        check(s.version == 16 && s.bytes == 80 && !s.webSlingshot, "wrong slingshot defaults");
+        check(s.version == 18 && s.bytes == 88 && !s.webSlingshot, "wrong slingshot defaults");
         check(offsetof(game_swing::Settings, webSlingshot) == 48, "old settings moved");
         s.webSlingshot = 1; check(game_swing::validSettings(s), "ON refused");
         s.webSlingshot = 2; check(!game_swing::validSettings(s), "invalid switch accepted");
@@ -1602,7 +1719,7 @@ int main() {
         check(vr_settings::choose(vr_settings::Item::betterClimbing, 1, v), "ON failed");
         check(vr_settings::withTabOnly({}, vr_settings::tabOnlyText(v)).betterClimbing, "switch not saved");
         game_swing::Settings s;
-        check(s.version == 16 && s.bytes == 80 && offsetof(game_swing::Settings, betterClimbing) == 52,
+        check(s.version == 18 && s.bytes == 88 && offsetof(game_swing::Settings, betterClimbing) == 52,
               "settings moved old fields");
         s.betterClimbing = 1; check(game_swing::validSettings(s), "ON refused");
         s.betterClimbing = 2; check(!game_swing::validSettings(s), "invalid switch accepted");
@@ -2938,10 +3055,10 @@ int main() {
     });
     test("grip climbing settings keep old packets and reject invalid versions, sizes and switches", [] {
         using namespace game_swing;
-        for (uint32_t version = 3; version <= 16; ++version) {
+        for (uint32_t version = 3; version <= 18; ++version) {
             Settings s;
             s.version = version;
-            s.bytes = 16 + 4 * version; // official v3=28 through custom v16=80
+            s.bytes = 16 + 4 * version; // official v3=28 through custom v18=88
             check(validSettings(s), "compatible settings packet was refused");
             ++s.bytes;
             check(!validSettings(s), "wrong settings length was accepted");
@@ -2958,7 +3075,7 @@ int main() {
     test("merged settings keep phone suppression, arcade webs and hand climbing independent", [] {
         using namespace game_swing;
         Settings s;
-        check(s.version == 16 && s.bytes == 80, "updated settings did not append the climbing field");
+        check(s.version == 18 && s.bytes == 88, "updated settings did not append the climbing field");
         check(offsetof(Settings, noBlows) == 36 && offsetof(Settings, arcade) == 40 &&
               offsetof(Settings, handClimb) == 44, "upstream phone or arcade fields moved");
         s.noBlows = 3;
@@ -20593,7 +20710,7 @@ int main() {
     test("free combat: settings default to called combat and preserve older packet layouts", [] {
         using namespace game_swing;
         Settings s;
-        check(s.version == 16 && s.bytes == 80 && s.combatVisuals == 1 &&
+        check(s.version == 18 && s.bytes == 88 && s.combatVisuals == 1 &&
                   offsetof(Settings, combatVisuals) == 56,
               "free combat broke the settings defaults or layout");
         s.combatVisuals = 0;
@@ -21094,6 +21211,9 @@ int main() {
               "swing assist missing under the soft release");
         check(all[13].item == Item::slingshotSpeed && all[12].item == Item::webSlingshot,
               "slingshot speed missing under the web slingshot");
+        check(all[14].item == Item::betterClimbing && all[15].item == Item::twoHandZip &&
+                  all[16].item == Item::ropeSteering,
+              "the hand gestures missing under better climbing");
         check(all[12].item == Item::webSlingshot, "slingshot missing under SWINGING");
         check(all[14].item == Item::betterClimbing, "better climbing missing under SWINGING");
         uint64_t seen = 0;
@@ -21118,9 +21238,9 @@ int main() {
         }
         // The sections (the player, October 19: "sort the options in spidy vr
         // settings ingame into nice sections"), each with a setting in the tab.
-        const std::pair<size_t, const char*> sections[] = {{0, "WEBS"},     {6, "SWINGING"}, {15, "COMFORT"},
-                                                           {18, "HAPTICS"}, {26, "DISPLAY"}, {36, "BODY"},
-                                                           {40, "EXPERIMENTAL"}};
+        const std::pair<size_t, const char*> sections[] = {{0, "WEBS"},     {6, "SWINGING"}, {17, "COMFORT"},
+                                                           {20, "HAPTICS"}, {28, "DISPLAY"}, {38, "BODY"},
+                                                           {42, "EXPERIMENTAL"}};
         check(headings == std::size(sections),
               "the sections: webs, swinging, comfort, haptics, display, body, experimental");
         for (const auto& [at, title] : sections) {
@@ -21132,33 +21252,33 @@ int main() {
         }
         // BODY: the calibration, then your height and seated play (the user, October 23: "add proper height
         // calibration or override for seated mode").
-        check(all[37].item == Item::calibrate && all[38].item == Item::height &&
-                  all[38].choices.size() == std::size(heights) && std::strcmp(all[38].choices[0], "AUTO") == 0 &&
-                  std::strcmp(all[38].choices[8], "190 CM") == 0 && all[39].item == Item::seated &&
-                  all[39].choices.empty(),
+        check(all[39].item == Item::calibrate && all[40].item == Item::height &&
+                  all[40].choices.size() == std::size(heights) && std::strcmp(all[40].choices[0], "AUTO") == 0 &&
+                  std::strcmp(all[40].choices[8], "190 CM") == 0 && all[41].item == Item::seated &&
+                  all[41].choices.empty(),
               "BODY: CALIBRATE BODY, then HEIGHT (AUTO, 150 to 190 cm), then SEATED, a switch");
-        check(all[41].item == Item::flips && all[41].choices.empty() && std::strcmp(all[40].title, "EXPERIMENTAL") == 0,
+        check(all[43].item == Item::flips && all[43].choices.empty() && std::strcmp(all[42].title, "EXPERIMENTAL") == 0,
               "the flips: a switch under EXPERIMENTAL");
-        check(all[43].item == Item::flipSpeed && all[43].choices.size() == std::size(flipSpeeds),
+        check(all[45].item == Item::flipSpeed && all[45].choices.size() == std::size(flipSpeeds),
               "the flip speed under the flips");
-        check(all[44].item == Item::handClimb && all[44].choices.empty(),
+        check(all[46].item == Item::handClimb && all[46].choices.empty(),
               "hand wall climbing switch under the flips");
         const Item realistic[] = {Item::realisticFlips,        Item::automaticStrength,    Item::automaticSpeed,
                                   Item::automaticMinimumSpeed, Item::automaticReleaseFlip, Item::automaticResponse,
                                   Item::automaticHandStrength, Item::automaticFalloff,     Item::automaticHandThreshold,
                                   Item::automaticAirBrake,     Item::automaticCombat};
-        check(all.size() == 47 + std::size(realistic), "the realistic flips' rows are not the last");
+        check(all.size() == 49 + std::size(realistic), "the realistic flips' rows are not the last");
         for (size_t i = 0; i < std::size(realistic); ++i)
-            check(all[47 + i].item == realistic[i], "the realistic flips' rows out of order");
-        check(std::strcmp(all[47].title, "REALISTIC FLIPS") == 0 && all[47].choices.empty(),
+            check(all[49 + i].item == realistic[i], "the realistic flips' rows out of order");
+        check(std::strcmp(all[49].title, "REALISTIC FLIPS") == 0 && all[49].choices.empty(),
               "realistic flips: a switch, first of its rows");
-        check(all[42].item == Item::controlledFlips && all[45].item == Item::wallRunCameraTilt, "custom switches misplaced");
+        check(all[44].item == Item::controlledFlips && all[47].item == Item::wallRunCameraTilt, "custom switches misplaced");
         // EYE AIM, before the realistic flips: what the eyes aim, off by default (only a headset that tracks
         // the eyes can).
-        check(all[46].item == Item::eyeAim && std::strcmp(all[46].title, "EYE AIM") == 0 &&
-                  all[46].choices.size() == 4 && std::strcmp(all[46].choices[0], "OFF") == 0 &&
-                  std::strcmp(all[46].choices[1], "WEB BALLS") == 0 && std::strcmp(all[46].choices[2], "ZIPS") == 0 &&
-                  std::strcmp(all[46].choices[3], "BOTH") == 0 && all[46].place == Place::tab,
+        check(all[48].item == Item::eyeAim && std::strcmp(all[48].title, "EYE AIM") == 0 &&
+                  all[48].choices.size() == 4 && std::strcmp(all[48].choices[0], "OFF") == 0 &&
+                  std::strcmp(all[48].choices[1], "WEB BALLS") == 0 && std::strcmp(all[48].choices[2], "ZIPS") == 0 &&
+                  std::strcmp(all[48].choices[3], "BOTH") == 0 && all[48].place == Place::tab,
               "EYE AIM: OFF, WEB BALLS, ZIPS, BOTH, in the tab before the realistic flips");
         {
             Values v;
@@ -21182,36 +21302,36 @@ int main() {
             check(std::strcmp(row.title, "STAND ON WALLS") != 0 &&
                       std::strcmp(row.title, "WALL CAMERA DISTANCE") != 0,
                   "the wall view or the wall camera's distance has a row again");
-        check(all[28].item == Item::screenSize && all[30].item == Item::hud && all[30].choices.size() == 4 &&
-                  std::strcmp(all[30].choices[0], "OFF") == 0 && std::strcmp(all[30].choices[3], "LARGE") == 0,
+        check(all[30].item == Item::screenSize && all[32].item == Item::hud && all[32].choices.size() == 4 &&
+                  std::strcmp(all[32].choices[0], "OFF") == 0 && std::strcmp(all[32].choices[3], "LARGE") == 0,
               "the HUD after the game screen's rows: OFF, SMALL, MEDIUM, LARGE");
-        check(all[29].item == Item::screenDepth && std::strcmp(all[29].title, "GAME SCREEN 3D") == 0 &&
-                  all[29].choices.size() == 4 && std::strcmp(all[29].choices[0], "OFF") == 0 &&
-                  std::strcmp(all[29].choices[3], "HIGH") == 0,
+        check(all[31].item == Item::screenDepth && std::strcmp(all[31].title, "GAME SCREEN 3D") == 0 &&
+                  all[31].choices.size() == 4 && std::strcmp(all[31].choices[0], "OFF") == 0 &&
+                  std::strcmp(all[31].choices[3], "HIGH") == 0,
               "the game screen's depth under its size: OFF, LOW, MEDIUM, HIGH");
         // The marks' look after the HUD (the player, October 21: "an optional alternative set of our custom
         // ingame vr ui in more scifi techy style like the base game ui"): the printed ones first.
-        check(all[31].item == Item::uiStyle && std::strcmp(all[31].title, "UI STYLE") == 0 &&
-                  all[31].choices.size() == 2 && std::strcmp(all[31].choices[0], "COMIC") == 0 &&
-                  std::strcmp(all[31].choices[1], "TECH") == 0,
+        check(all[33].item == Item::uiStyle && std::strcmp(all[33].title, "UI STYLE") == 0 &&
+                  all[33].choices.size() == 2 && std::strcmp(all[33].choices[0], "COMIC") == 0 &&
+                  std::strcmp(all[33].choices[1], "TECH") == 0,
               "the UI style after the HUD: COMIC, or TECH");
-        check(all[33].item == Item::nearClip && std::strcmp(all[33].title, "NEAR CLIP") == 0 &&
-                  all[33].choices.size() == std::size(nearClips) && std::strcmp(all[33].choices[6], "10 CM") == 0,
+        check(all[35].item == Item::nearClip && std::strcmp(all[35].title, "NEAR CLIP") == 0 &&
+                  all[35].choices.size() == std::size(nearClips) && std::strcmp(all[35].choices[6], "10 CM") == 0,
               "the near clip under the UI style: 1 to 10 cm");
-        check(all[34].item == Item::recordingFov && std::strcmp(all[34].title, "RECORDING FOV") == 0 &&
-                  all[34].choices.size() == std::size(recording_fov::choices) &&
-                  std::strcmp(all[34].choices[0], "OFF") == 0 &&
-                  std::strcmp(all[34].choices[1], "70\xC2\xB0") == 0 &&
-                  std::strcmp(all[34].choices[8], "160\xC2\xB0") == 0,
+        check(all[36].item == Item::recordingFov && std::strcmp(all[36].title, "RECORDING FOV") == 0 &&
+                  all[36].choices.size() == std::size(recording_fov::choices) &&
+                  std::strcmp(all[36].choices[0], "OFF") == 0 &&
+                  std::strcmp(all[36].choices[1], "70\xC2\xB0") == 0 &&
+                  std::strcmp(all[36].choices[8], "160\xC2\xB0") == 0,
               "the recording FOV under DISPLAY: OFF, then 70 to 160 degrees");
-        check(all[35].item == Item::recordingSmoothing && all[35].choices.size() == 9 &&
-                  std::strcmp(all[35].choices[0], "OFF") == 0,
+        check(all[37].item == Item::recordingSmoothing && all[37].choices.size() == 9 &&
+                  std::strcmp(all[37].choices[0], "OFF") == 0,
               "the recording smoothing last under DISPLAY: OFF, then 10 to 100");
         // Webs are always physical (the user, October 15: "remove non physical web, no need for it").
         for (const auto& row : all)
             check(std::strcmp(row.title, "PHYSICAL WEBS") != 0, "webs can still be made non-physical");
-        check(all[27].item == Item::view && std::strcmp(all[27].title, "VR VIEW") == 0 && all[27].choices.size() == 2 &&
-                  std::strcmp(all[27].choices[0], "VR") == 0 && std::strcmp(all[27].choices[1], "GAME SCREEN") == 0,
+        check(all[29].item == Item::view && std::strcmp(all[29].title, "VR VIEW") == 0 && all[29].choices.size() == 2 &&
+                  std::strcmp(all[29].choices[0], "VR") == 0 && std::strcmp(all[29].choices[1], "GAME SCREEN") == 0,
               "the view above the game screen's rows: VR, or GAME SCREEN");
         // VR VIEW is on the pause menu's first page, beside RESUME, and no other row is; the realistic
         // flips' thresholds and how a spin builds and dies away are the launcher's alone (the user,
@@ -21225,7 +21345,7 @@ int main() {
                                                          : Place::tab),
                   "a row in the wrong place");
         }
-        check(std::count_if(all.begin(), all.end(), [](const Row& r) { return r.place == Place::tab; }) == 53,
+        check(std::count_if(all.begin(), all.end(), [](const Row& r) { return r.place == Place::tab; }) == 55,
               "the tab's own rows");
         check(all[1].item == Item::webStyle && std::strcmp(all[1].title, "WEB STYLE") == 0 &&
                   all[1].choices.size() == 2 && std::strcmp(all[1].choices[0], "REALISTIC") == 0 &&
@@ -21236,19 +21356,19 @@ int main() {
               "the web button under the web style: GRIP, or TRIGGER");
         check(all[3].item == Item::aimMarkers && all[4].item == Item::airWebs, "the aim markers, then the air webs");
         check(all[7].item == Item::swingSpeed && all[8].item == Item::weight, "SWINGING: the swing speed, the weight");
-        check(all[16].item == Item::snapTurn && all[17].item == Item::smoothTurn, "COMFORT: snap and smooth turning");
+        check(all[18].item == Item::snapTurn && all[19].item == Item::smoothTurn, "COMFORT: snap and smooth turning");
         // HAPTICS (October 20): the controllers' vibration, the bHaptics level and its four groups' switches.
-        check(all[20].item == Item::blowSounds && std::strcmp(all[20].title, "BLOW SOUNDS") == 0 &&
-                  all[20].choices.size() == 3 && std::strcmp(all[20].choices[0], "GAME") == 0 &&
-                  std::strcmp(all[20].choices[2], "OFF") == 0,
+        check(all[22].item == Item::blowSounds && std::strcmp(all[22].title, "BLOW SOUNDS") == 0 &&
+                  all[22].choices.size() == 3 && std::strcmp(all[22].choices[0], "GAME") == 0 &&
+                  std::strcmp(all[22].choices[2], "OFF") == 0,
               "BLOW SOUNDS under the vibration: GAME, SPIDY or OFF");
-        check(all[19].item == Item::haptics && all[21].item == Item::bodyHaptics &&
-                  std::strcmp(all[21].title, "BODY HAPTICS") == 0 && all[22].item == Item::hapticWebs &&
-                  all[23].item == Item::hapticWind && all[24].item == Item::hapticCombat &&
-                  all[25].item == Item::hapticMovement && all[22].choices.empty() && all[25].choices.empty(),
+        check(all[21].item == Item::haptics && all[23].item == Item::bodyHaptics &&
+                  std::strcmp(all[23].title, "BODY HAPTICS") == 0 && all[24].item == Item::hapticWebs &&
+                  all[25].item == Item::hapticWind && all[26].item == Item::hapticCombat &&
+                  all[27].item == Item::hapticMovement && all[24].choices.empty() && all[27].choices.empty(),
               "HAPTICS: the vibration, body haptics, then the web, wind, combat and movement switches");
-        check(all[37].item == Item::calibrate && all[37].choices.size() == 2 &&
-                  std::strcmp(all[37].choices[1], "ON RESUME") == 0,
+        check(all[39].item == Item::calibrate && all[39].choices.size() == 2 &&
+                  std::strcmp(all[39].choices[1], "ON RESUME") == 0,
               "the body's calibration: NO, or ON RESUME");
         // Every setting has a row.
         constexpr uint64_t everySetting = (uint64_t{2} << static_cast<unsigned>(lastItem)) - 2;
@@ -21386,7 +21506,8 @@ int main() {
                                        "body_haptics_movement=1\nrecording_fov=0\nui_style=0\ncombat_visuals=1\nblow_sounds=0\n"
                                        "web_slingshot=0\nbetter_climbing=0\nheight_cm=0\nseated=0\neye_aim=0\n"
                                        "smart_anchor=0\nelastic_web=0\nsoft_release=0\nswing_assist=0\n"
-                                       "slingshot_speed=0\nrecording_smoothing=0\n",
+                                       "slingshot_speed=0\nrecording_smoothing=0\n"
+                                       "two_hand_zip=0\nrope_steering=0\n",
               "the defaults' text");
         Values changed = defaults;
         changed.recordingFov = 140;

@@ -264,9 +264,10 @@ void previewAims(const Command& c, const Input& in, const Body& player, const Wo
     InterlockedIncrement64(&SpidyAimData.sequence);
     ReleaseSRWLockExclusive(&output);
 }
-// BETTER CLIMBING, standing with no native step to drive: the swing still
-// takes the hands, so that a pull down a shared web starts the climb with
-// the game's own takeoff, no jump pressed (pull request #44).
+// BETTER CLIMBING or the hand gestures, standing with no native step to
+// drive: the swing still takes the hands, so that a pull down a shared web
+// (pull request #44) or a two hand zip (#47) leaves the ground by the
+// game's own takeoff, no jump pressed.
 void idleRopeInput(const Command& c, const Input& in, const native_rays::QueryContext& world,
                    const Body& player, const native_movement::Data& motion, int64_t qpc) {
     const float elapsed = inputClock.consume(c);
@@ -290,11 +291,16 @@ void idleRopeInput(const Command& c, const Input& in, const native_rays::QueryCo
     }
     for (const auto& web : solver.webs())
         attached |= web.attached;
+    launched |= solver.gestureTakeoff();
     const bool lift = solver.climbTakeoff() || launched || (!solver.slingshotEnabled() && newAttach);
     const auto transition =
         takeoffTransition.update(GetTickCount64(), attached || launched, true,
                                  native_movement::collisionEnabled(motion.collisionFlags), lift, lift,
-                                 player.position, {}, launched ? intent.velocity : Vec3{}, launched);
+                                 player.position, {},
+                                 solver.gestureTakeoff() ? solver.gestureLaunch()
+                                 : launched              ? intent.velocity
+                                                         : Vec3{},
+                                 launched);
     AcquireSRWLockExclusive(&output);
     auto& d = SpidySwingData;
     InterlockedIncrement64(&d.sequence);
@@ -572,7 +578,7 @@ void visit(const native_rays::QueryContext& world) {
         return;
     }
     if (focused && nativeFloor && !owned && !handCrawl && (!fresh || motion.steps == lastStep) &&
-        solver.betterClimbingEnabled()) {
+        (solver.betterClimbingEnabled() || solver.gesturesEnabled())) {
         idleRopeInput(c, in, world, player, motion, now.QuadPart);
         return;
     }
@@ -699,7 +705,7 @@ void visit(const native_rays::QueryContext& world) {
     // his webs along: they are ropes that pay out, and hold him at their new
     // length once he is in the air (Swing::payOut).
     uint32_t paid{};
-    if (!owned && !solver.climbTakeoff()) {
+    if (!owned && !solver.climbTakeoff() && !solver.gestureTakeoff()) {
         const float before[2]{solver.webs()[0].length, solver.webs()[1].length};
         solver.payOut(body.position, groundSlack);
         for (unsigned i = 0; i < 2; ++i)
@@ -734,7 +740,7 @@ void visit(const native_rays::QueryContext& world) {
         newAttachment |= event.kind == EventKind::Attach;
         zipped |= event.kind == EventKind::Zip;
     }
-    pointLaunched |= slingshotLaunched;
+    pointLaunched |= slingshotLaunched || solver.gestureTakeoff();
     // Keep released flight and the short post-zip landing window. This lets
     // the solver issue a point launch before handing ordinary walking back.
     // Native gravity history is not a reliable midair handoff source.
@@ -773,7 +779,10 @@ void visit(const native_rays::QueryContext& world) {
         takeoffTransition.update(GetTickCount64(), attached || strikeLift || slingshotLaunched,
                                  body.grounded, collidable, wantsLift || strikeLift,
                                  zipped || pointLaunched || newAttachment, harness,
-                                 motion.achievedVelocity, (zipped || pointLaunched) ? predicted.velocity : Vec3{},
+                                 motion.achievedVelocity,
+                                 solver.gestureTakeoff()   ? solver.gestureLaunch()
+                                 : zipped || pointLaunched ? predicted.velocity
+                                                           : Vec3{},
                                  pointLaunched, length(crawl) > .5f ? crawl : Vec3{0, 1, 0});
     if (transition.resumed)
         requested = limited(requested + transition.launchVelocity - body.velocity, cap);
@@ -1179,7 +1188,8 @@ extern "C" __declspec(dllexport) DWORD WINAPI SpidySwingSettings(void* input) {
          header[2] != settingsBytesV6 && header[2] != settingsBytesV7 && header[2] != settingsBytesV8 &&
          header[2] != settingsBytesV9 && header[2] != settingsBytesV10 && header[2] != settingsBytesV11 &&
          header[2] != settingsBytesV12 && header[2] != settingsBytesV13 && header[2] != settingsBytesV14 &&
-         header[2] != settingsBytesV15 && header[2] != sizeof(s)) ||
+         header[2] != settingsBytesV15 && header[2] != settingsBytesV16 && header[2] != settingsBytesV17 &&
+         header[2] != sizeof(s)) ||
         !copy(&s, input, header[2]) || !validSettings(s))
         return 2001;
     AcquireSRWLockExclusive(&lifecycle);
@@ -1234,6 +1244,8 @@ extern "C" __declspec(dllexport) DWORD WINAPI SpidySwingSettings(void* input) {
             solver.allowSwingAssist(s.swingAssist != 0);
         if (s.version >= 16)
             solver.setSlingshotSpeed(s.slingshotSpeed);
+        if (s.version >= 17)
+            solver.allowGestures(s.twoHandZip != 0, s.version >= 18 && s.ropeSteering != 0);
         // A swing started without the grab (-NoWebGrab) offers it from now on.
         if (s.grab && !game_grab::offering() && driveMotion && sampleDriven) {
             config.grabKinds = game_grab::movableKinds;

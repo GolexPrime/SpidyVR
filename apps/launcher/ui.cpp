@@ -1857,6 +1857,11 @@ void App::options(ImVec2 origin, ImVec2 size) {
                S(150), [&] { tabCombo("##slingshotspeed", Item::slingshotSpeed); });
         option("Better climbing", "Take one web in both hands, then pull hand over hand to keep climbing it.",
                S(42), [&] { tabToggle("##betterclimbing", Item::betterClimbing); });
+        option("Two hand web zip", "Both webs on one spot: pull both arms back fast to launch at it.",
+               S(42), [&] { tabToggle("##twohandzip", Item::twoHandZip); });
+        option("Hand rope steering",
+               "Hold your web with the free hand too and pull sideways to turn your swing.", S(42),
+               [&] { tabToggle("##ropesteering", Item::ropeSteering); });
         option("Snap turn", "How far a flick of the right stick turns you.", S(150), [&] {
             stepCombo("##snap", kSnapTurns, kSnapValues, static_cast<int>(std::size(kSnapValues)), &o.snapTurn);
         });

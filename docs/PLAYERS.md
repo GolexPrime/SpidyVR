@@ -777,7 +777,13 @@ VR settings
                    BETTER CLIMBING (off until you switch it on): take a
                    web in both hands and pull hand over hand to climb
                    it, an open-air web too; standing, a pull down it
-                   takes you off the ground, no jump needed.
+                   takes you off the ground, no jump needed. TWO HAND
+                   WEB ZIP (off until you switch it on): with both webs
+                   on one spot, pull both arms back fast toward it and
+                   you launch at it, harder the faster you pull. HAND
+                   ROPE STEERING (off until you switch it on): hold your
+                   web with the free hand too and pull it sideways to
+                   turn your swing; it makes you no faster.
                    SWING ASSIST (off until you switch it on): flying at
                    a wall on a web, or just after, you slow down in time
                    instead of slamming into it; nothing turns you or
@@ -862,7 +868,7 @@ VR settings
   Changes apply at once. The launcher starts your next session with them;
   its options show every one of them but VR VIEW too.
   NEAR CLIP, RECORDING FOV, UI STYLE, BLOW SOUNDS, HEIGHT, SEATED, EYE AIM, SMART ANCHOR, ELASTIC WEB, SOFT RELEASE, SWING
-  ASSIST, SLINGSHOT SPEED, RECORDING SMOOTHING, the four body haptics switches and the
+  ASSIST, SLINGSHOT SPEED, RECORDING SMOOTHING, TWO HAND WEB ZIP, HAND ROPE STEERING, the four body haptics switches and the
   CONTROLLED FLIPS and EXPERIMENTAL rows below FLIP SPEED Spidy keeps in
   %APPDATA%\Spidy\spidy_vr.ini, beside the launcher's own settings; the
   launcher shows realistic flips' ten rows while it is on, and the body
