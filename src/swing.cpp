@@ -741,6 +741,7 @@ void Swing::reset(Body b) {
     mount_ = mountLeft_ = 0;
     mounting_ = offered_ = mountOffered_ = false;
     strands_ = 0;
+    assistFlight_ = 0;
     releasePull_ = {};
     releaseLeft_ = 0;
 }
@@ -908,6 +909,7 @@ WebShot Swing::shot(Pose aim, Vec3 from, const WorldQueries& world) const {
     return out;
 }
 void Swing::releaseAll() {
+    assistFlight_ = 0;
     clearSlingshot();
     climbing_ = {};
     for (int i = 0; i < 2; ++i) {
@@ -1191,6 +1193,48 @@ void Swing::move(Vec3 target, const World* collision) {
             body_.grounded = true;
     }
 }
+// SWING ASSIST: five rays the body's size along its travel; at a surface
+// ahead, only the speed into it that could not be shed at 30 m/s^2 in time
+// is taken away.
+void Swing::avoidObstacles(float dt, const Input& in, const WorldQueries& world) {
+    if (!swingAssist_)
+        return;
+    const bool connected = webs_[0].attached || webs_[1].attached;
+    assistFlight_ = connected ? .8f : std::max(0.f, assistFlight_ - dt);
+    const float speed = length(body_.velocity);
+    if (!in.focused || body_.grounded || wall_.on || assistFlight_ <= 0 || speed < .05f || in.wallRotate ||
+        hands_[0].ropeClimbing || hands_[1].ropeClimbing)
+        return;
+    const Vec3 direction = body_.velocity / speed;
+    const Vec3 right =
+        normalized(cross(direction, std::abs(direction.y) < .9f ? Vec3{0, 1, 0} : Vec3{1, 0, 0}));
+    const float look = std::clamp(speed * .6f + speed * speed / 100.f, 2.f, 100.f);
+    const float radius = config_.radius + .15f;
+    float nearest = look;
+    Vec3 normal{};
+    for (const Vec3 offset : {Vec3{}, right * radius, -right * radius, Vec3{0, .65f, 0}, Vec3{0, -.65f, 0}}) {
+        const Vec3 origin = body_.position + offset;
+        const auto hit = world.bodyRaycast(origin, direction, look);
+        if (!hit || !finite(hit->point) || !finite(hit->normal))
+            continue;
+        const Vec3 n = normalized(hit->normal);
+        const float distance = dot(hit->point - origin, direction);
+        if (length(n) < .9f || dot(n, direction) > -.1f || distance < 0 || distance >= nearest)
+            continue;
+        nearest = distance;
+        normal = n;
+    }
+    if (length(normal) < .9f)
+        return;
+    // Keep the player's chosen lane. Only remove excess velocity INTO the
+    // surface; never invent a sideways/upwards destination from ray scores.
+    const float closing = -dot(body_.velocity, normal);
+    const float safeClosing = std::sqrt(2.f * 30.f * std::max(0.f, nearest - radius - .4f));
+    if (closing <= safeClosing)
+        return;
+    const float reduction = std::min(closing - safeClosing, 50.f * dt);
+    body_.velocity += normal * reduction;
+}
 void Swing::step(float dt, const Input& in, const WorldQueries& world, const World* collision) {
     sinceZip_ += dt;
     sinceLanding_ += dt;
@@ -1414,6 +1458,7 @@ void Swing::update(float seconds, const Input& input, const World& world) {
         return;
     }
     inputs(seconds, input, world);
+    avoidObstacles(seconds, input, world);
     senseWall(seconds, input, world);
     accumulator_ += seconds;
     int steps = 0;
@@ -1478,6 +1523,7 @@ MotionIntent Swing::predictNativeStep(float seconds, const Input& input, const W
             climbing_ = {};
         inputs(inputSeconds, input, world);
     }
+    avoidObstacles(seconds, input, world);
     senseWall(seconds, input, world);
     const auto count = static_cast<unsigned>(std::ceil(seconds / config_.fixedStep));
     const float dt = seconds / count;

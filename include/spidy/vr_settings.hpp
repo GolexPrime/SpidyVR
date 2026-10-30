@@ -152,6 +152,10 @@ struct Values {
     // SOFT RELEASE): 0 at once, as before; 1 to 3 for 120, 180 or 240 ms
     // (Swing::softRelease; pull request #41).
     int softRelease = 0;
+    // While a web carries you and for a moment after, speed into what is
+    // ahead is cut so you do not slam into it; your lane stays yours (the
+    // tab's SWING ASSIST; Swing::allowSwingAssist; pull request #42).
+    bool swingAssist = false;
     bool operator==(const Values&) const = default;
 };
 inline constexpr int eyeAimShots = 1, eyeAimZips = 2;
@@ -248,8 +252,9 @@ enum class Item : uint8_t {
     smartAnchor,
     elasticWeb,
     softRelease,
+    swingAssist,
 };
-inline constexpr Item lastItem = Item::softRelease;
+inline constexpr Item lastItem = Item::swingAssist;
 // Where a row shows: in the tab; on the pause menu's first page instead,
 // under RESUME: VR VIEW (the user, October 15: "move the VIEW: GAME SCREEN to
 // the first menu (the one with resume)"); or only in the launcher's options:
@@ -272,7 +277,7 @@ struct Row {
     std::span<const char* const> choices{};
     Place place{};
 };
-const std::array<Row, 55>& rows();
+const std::array<Row, 56>& rows();
 // The most choices a row shows (game_menu's buffers): a row with more would
 // lose its last ones.
 inline constexpr size_t maxChoices = 9;

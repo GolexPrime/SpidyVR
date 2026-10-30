@@ -537,6 +537,14 @@ class Swing {
             releaseLeft_ = 0;
         }
     }
+    // Flying at something with a web (or for 0.8 s after), speed into it is
+    // cut, at most 50 m/s^2, so that it can still be met at 30 m/s^2.
+    // Nothing turns or lifts the player (avoidObstacles).
+    void allowSwingAssist(bool on) {
+        swingAssist_ = on;
+        if (!on)
+            assistFlight_ = 0;
+    }
     const SwingConfig& config() const {
         return config_;
     }
@@ -558,6 +566,10 @@ class Swing {
     int softRelease_{};
     Vec3 releasePull_{};
     float releaseLeft_{};
+    // SWING ASSIST: how much longer it watches after the last web.
+    bool swingAssist_{};
+    float assistFlight_{};
+    void avoidObstacles(float seconds, const Input& in, const WorldQueries& world);
     struct HandState {
         // held: grip squeezed, with release hysteresis. A web shoots only on the
         // press that sets it, so a lost web never re-fires while the grip stays held.

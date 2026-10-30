@@ -210,6 +210,8 @@ template <class V> auto switchOf(Item item, V& v) -> decltype(&v.aimMarkers) {
         return &v.betterClimbing;
     case Item::smartAnchor:
         return &v.smartAnchor;
+    case Item::swingAssist:
+        return &v.swingAssist;
     case Item::combatVisuals:
         return &v.combatVisuals;
     case Item::aimMarkers:
@@ -285,9 +287,9 @@ Values sanitized(Values v) {
     v.automaticHandThreshold = std::clamp(v.automaticHandThreshold, 50, 300);
     return v;
 }
-const std::array<Row, 55>& rows() {
+const std::array<Row, 56>& rows() {
     // The help fits the game's description column beside the rows.
-    static const std::array<Row, 55> all{{
+    static const std::array<Row, 56> all{{
         {Item::none, "WEBS", nullptr, {}},
         {Item::webStyle, "WEB STYLE",
          "Arcade: webs pass lamp posts, signs and cars, and swings stay above the street.", webStyleChoices},
@@ -310,6 +312,8 @@ const std::array<Row, 55>& rows() {
          levelChoices},
         {Item::softRelease, "SOFT RELEASE",
          "A web's last pull fades briefly as you let go. Higher lasts longer.", levelChoices},
+        {Item::swingAssist, "SWING ASSIST",
+         "Swinging at a wall, you slow down before it. Your line stays yours.", {}},
         {Item::webSlingshot,
          "WEB SLINGSHOT",
          "No auto jump. Draw two fixed webs, hold for vibration, release both to launch.",
@@ -578,6 +582,7 @@ constexpr TabOnly tabOnly[] = {
     {"smart_anchor", &Values::smartAnchor, nullptr},
     {"elastic_web", nullptr, &Values::elasticWeb},
     {"soft_release", nullptr, &Values::softRelease},
+    {"swing_assist", &Values::swingAssist, nullptr},
 };
 } // namespace
 std::string tabOnlyText(const Values& v) {
