@@ -515,6 +515,10 @@ class Swing {
     // Hand `hand` is free and on the other hand's web, as of the latest
     // input: its grip press would take hold of that web, and shoot none.
     bool onStrand(int hand) const;
+    // The same with BETTER CLIMBING, from `in`'s own hand poses: a hand that
+    // reaches onto the strand and grips in one sample takes hold of it
+    // instead of shooting another web (pull request #44).
+    bool onStrand(int hand, const Input& in) const;
     // Hand `hand`'s web holds the body when taut: any web but the longer
     // rope of two hands on one web.
     bool bears(int hand) const;
@@ -545,6 +549,16 @@ class Swing {
         if (!on)
             assistFlight_ = 0;
     }
+    bool betterClimbingEnabled() const {
+        return betterClimbing_;
+    }
+    // With BETTER CLIMBING, standing: a hand on a shared web pulled it
+    // down, which asks the game for its jump (game_swing's takeoff).
+    bool climbTakeoff() const {
+        return climbTakeoff_ && betterClimbing_ &&
+               ((webs_[0].attached && hands_[0].ropeClimbing) ||
+                (webs_[1].attached && hands_[1].ropeClimbing));
+    }
     const SwingConfig& config() const {
         return config_;
     }
@@ -570,6 +584,7 @@ class Swing {
     bool swingAssist_{};
     float assistFlight_{};
     void avoidObstacles(float seconds, const Input& in, const WorldQueries& world);
+    bool climbTakeoff_{};
     struct HandState {
         // held: grip squeezed, with release hysteresis. A web shoots only on the
         // press that sets it, so a lost web never re-fires while the grip stays held.

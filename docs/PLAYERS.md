@@ -768,6 +768,10 @@ VR settings
                    on HIGH. SOFT RELEASE (OFF unless you pick LOW,
                    MEDIUM or HIGH): a web you let go of keeps pulling
                    for a moment, fading out (120, 180 or 240 ms).
+                   BETTER CLIMBING (off until you switch it on): take a
+                   web in both hands and pull hand over hand to climb
+                   it, an open-air web too; standing, a pull down it
+                   takes you off the ground, no jump needed.
                    SWING ASSIST (off until you switch it on): flying at
                    a wall on a web, or just after, you slow down in time
                    instead of slamming into it; nothing turns you or
