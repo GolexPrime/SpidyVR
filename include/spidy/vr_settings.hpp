@@ -37,6 +37,9 @@ struct Values {
     int haptics = 100;     // controller vibration, percent
     int screenSize = 1;    // the game screen: 0 small, 1 medium, 2 large
     bool airWebs = true;   // a web that meets nothing within reach holds in open air there
+    // With airWebs off, a web that just misses (by up to 8 degrees) catches
+    // the nearest real surface instead (Swing::shot; pull request #39).
+    bool smartAnchor = false;
     bool webShooter = true; // a free hand's trigger shoots web balls
     // Degrees a second the right stick turns you while held over; 0: it snap
     // turns instead.
@@ -234,8 +237,9 @@ enum class Item : uint8_t {
     controlledFlips,
     combatVisuals,
     eyeAim,
+    smartAnchor,
 };
-inline constexpr Item lastItem = Item::eyeAim;
+inline constexpr Item lastItem = Item::smartAnchor;
 // Where a row shows: in the tab; on the pause menu's first page instead,
 // under RESUME: VR VIEW (the user, October 15: "move the VIEW: GAME SCREEN to
 // the first menu (the one with resume)"); or only in the launcher's options:
@@ -258,7 +262,7 @@ struct Row {
     std::span<const char* const> choices{};
     Place place{};
 };
-const std::array<Row, 52>& rows();
+const std::array<Row, 53>& rows();
 // The most choices a row shows (game_menu's buffers): a row with more would
 // lose its last ones.
 inline constexpr size_t maxChoices = 9;

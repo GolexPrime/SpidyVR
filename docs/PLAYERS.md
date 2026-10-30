@@ -758,7 +758,10 @@ VR settings
                    (GRIP or TRIGGER: the one that shoots and holds a web;
                    the other reels in and shoots web balls); AIM MARKERS;
                    webs holding in open air (a web that meets nothing
-                   within 100 m holds there; off, it misses).
+                   within 100 m holds there; off, it misses); SMART
+                   ANCHOR (off until you switch it on): with open-air
+                   webs off, a web that just misses, by up to 8
+                   degrees, catches the real surface nearest it.
   SWINGING ....... the swing speed limit and your weight.
   COMFORT ........ snap turn and smooth turn.
   HAPTICS ........ controller vibration; BLOW SOUNDS (GAME: your blows
@@ -835,7 +838,8 @@ VR settings
                    Desktop: its eye tracking forwarding).
   Changes apply at once. The launcher starts your next session with them;
   its options show every one of them but VR VIEW too.
-  NEAR CLIP, RECORDING FOV, UI STYLE, BLOW SOUNDS, HEIGHT, SEATED, EYE AIM, the four body haptics switches and the
+  NEAR CLIP, RECORDING FOV, UI STYLE, BLOW SOUNDS, HEIGHT, SEATED, EYE AIM, SMART ANCHOR, the four body haptics
+  switches and the
   CONTROLLED FLIPS and EXPERIMENTAL rows below FLIP SPEED Spidy keeps in
   %APPDATA%\Spidy\spidy_vr.ini, beside the launcher's own settings; the
   launcher shows realistic flips' ten rows while it is on, and the body

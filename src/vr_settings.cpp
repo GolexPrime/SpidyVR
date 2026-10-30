@@ -197,6 +197,8 @@ template <class V> auto switchOf(Item item, V& v) -> decltype(&v.aimMarkers) {
         return &v.webSlingshot;
     case Item::betterClimbing:
         return &v.betterClimbing;
+    case Item::smartAnchor:
+        return &v.smartAnchor;
     case Item::combatVisuals:
         return &v.combatVisuals;
     case Item::aimMarkers:
@@ -270,9 +272,9 @@ Values sanitized(Values v) {
     v.automaticHandThreshold = std::clamp(v.automaticHandThreshold, 50, 300);
     return v;
 }
-const std::array<Row, 52>& rows() {
+const std::array<Row, 53>& rows() {
     // The help fits the game's description column beside the rows.
-    static const std::array<Row, 52> all{{
+    static const std::array<Row, 53> all{{
         {Item::none, "WEBS", nullptr, {}},
         {Item::webStyle, "WEB STYLE",
          "Arcade: webs pass lamp posts, signs and cars, and swings stay above the street.", webStyleChoices},
@@ -283,6 +285,8 @@ const std::array<Row, 52>& rows() {
          "WEBS HOLD IN OPEN AIR",
          "With nothing in reach, a web still holds in open air, 100 m out.",
          {}},
+        {Item::smartAnchor, "SMART ANCHOR",
+         "With open-air webs off, a near miss catches a real surface in a small cone.", {}},
         {Item::none, "SWINGING", nullptr, {}},
         {Item::swingSpeed, "SWING SPEED LIMIT", "How fast a swing can carry you.", swingChoices},
         {Item::weight, "WEIGHT",
@@ -546,6 +550,7 @@ constexpr TabOnly tabOnly[] = {
     {"height_cm", nullptr, &Values::heightCm},
     {"seated", &Values::seated, nullptr},
     {"eye_aim", nullptr, &Values::eyeAim},
+    {"smart_anchor", &Values::smartAnchor, nullptr},
 };
 } // namespace
 std::string tabOnlyText(const Values& v) {

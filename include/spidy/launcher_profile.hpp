@@ -79,6 +79,7 @@ inline constexpr ProfileSetting profileSettings[] = {
     launcherOption("trigger_webs", Item::webButton, &SessionOptions::triggerWebs),
     launcherOption("aim_markers", Item::aimMarkers, &SessionOptions::aimMarkers),
     launcherOption("air_webs", Item::airWebs, &SessionOptions::airWebs),
+    tabOnly("smart_anchor", Item::smartAnchor, &Values::smartAnchor),
     launcherOption("swing_speed", Item::swingSpeed, 10, 65, &SessionOptions::swingSpeed),
     launcherOption("weight", Item::weight, 40, 300, &SessionOptions::weight),
     tabOnly("web_slingshot", Item::webSlingshot, &Values::webSlingshot),
