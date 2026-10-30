@@ -105,6 +105,14 @@ struct ScreenData {
     uint32_t skip{}, backBufferFormat{};
 };
 static_assert(sizeof(ScreenData) == 72);
+// The steadier-HUD probe (hud_capture.hpp, SpidyHudCapture). native_hud (main
+// thread) registers the panel's texture as it finds it (`path`: how), and
+// says whether it is wanted; while it is, a Present now and then copies the
+// texture back to memory, in the state the game's executed barriers left it.
+// Nothing here can stop the eye views: the probe's own failures only skip.
+void registerHud(ID3D12Resource* resource, uint32_t path);
+void refuseHud();
+void wantHud(bool wanted);
 DWORD start(void* input);
 DWORD stop();
 } // namespace spidy::native_gpu

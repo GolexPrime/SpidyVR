@@ -43,6 +43,7 @@
 #include "spidy/slow_motion.hpp"
 #include "spidy/spectator_smoothing.hpp"
 #include "spidy/hand_pose.hpp"
+#include "spidy/hud_capture.hpp"
 #include "spidy/impact_sound.hpp"
 #include "spidy/web_strike.hpp"
 #include "spidy/spider_sense.hpp"
@@ -23967,6 +23968,18 @@ int main() {
               "the aims' turn");
         // The eyes stay as rendered: the overlay's views must match the image.
         check(shown.eyes == f.eyes && length(fr::eyesMiddle(shown) - middle) < 1e-3f, "the eyes were turned");
+    });
+    test("the steadier-HUD probe snapshots now and then and reads back only 8-bit colour", [] {
+        using namespace spidy::hud_capture;
+        check(snapshotDue(100, 0, false), "no first snapshot");
+        check(!snapshotDue(100 + snapshotMs - 1, 100, true) && snapshotDue(100 + snapshotMs, 100, true),
+              "snapshots not every few seconds");
+        bool swap{};
+        check(readableBytes(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, swap) == 4 && !swap, "RGBA not read");
+        check(readableBytes(DXGI_FORMAT_B8G8R8A8_UNORM, swap) == 4 && swap, "BGRA not swapped");
+        check(readableBytes(DXGI_FORMAT_R16G16B16A16_FLOAT, swap) == 0 &&
+                  readableBytes(DXGI_FORMAT_R10G10B10A2_UNORM, swap) == 0,
+              "a format the picture cannot show was read");
     });
     std::cout << total - failed << '/' << total << " tests passed\n";
     return failed ? 1 : 0;
