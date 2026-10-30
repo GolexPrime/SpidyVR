@@ -33,7 +33,9 @@ constexpr const char* depthChoices[] = {"OFF", "LOW", "MEDIUM", "HIGH"};
 constexpr const char* nearClipChoices[] = {"1 CM", "1.5 CM", "2 CM", "3 CM", "5 CM", "7.5 CM", "10 CM"};
 static_assert(std::size(nearClipChoices) == std::size(nearClips));
 // RECORDING FOV: the least the monitor's view shows across (recording_fov.hpp).
-constexpr const char* recordingFovChoices[] = {"OFF", "130\xC2\xB0", "140\xC2\xB0", "150\xC2\xB0"};
+constexpr const char* recordingFovChoices[] = {"OFF",          "70\xC2\xB0",  "90\xC2\xB0",
+                                               "110\xC2\xB0", "120\xC2\xB0", "130\xC2\xB0",
+                                               "140\xC2\xB0", "150\xC2\xB0", "160\xC2\xB0"};
 static_assert(std::size(recordingFovChoices) == std::size(recording_fov::choices));
 // UI STYLE, a list (ui_style.hpp's UiStyle in order) so that a style can
 // come after them: COMIC, the printed marks, or TECH, the game's own look.
@@ -93,6 +95,10 @@ constexpr int slingshotSpeeds[] = {0, 20, 40, 50, 65, 100, 150, 200, 300};
 constexpr const char* slingshotSpeedChoices[] = {"SWING LIMIT", "20 M/S",  "40 M/S",  "50 M/S", "65 M/S",
                                                  "100 M/S",     "150 M/S", "200 M/S", "300 M/S"};
 static_assert(std::size(slingshotSpeedChoices) == std::size(slingshotSpeeds));
+// RECORDING SMOOTHING: off, then slower and slower turns.
+constexpr int recordingSmoothings[] = {0, 10, 20, 30, 40, 50, 60, 80, 100};
+constexpr const char* recordingSmoothingChoices[] = {"OFF", "10", "20", "30", "40", "50", "60", "80", "100"};
+static_assert(std::size(recordingSmoothingChoices) == std::size(recordingSmoothings));
 } // namespace
 
 std::span<const int> steps(Item item) {
@@ -121,6 +127,8 @@ std::span<const int> steps(Item item) {
         return levelSteps;
     case Item::slingshotSpeed:
         return slingshotSpeeds;
+    case Item::recordingSmoothing:
+        return recordingSmoothings;
     case Item::nearClip:
         return nearClips;
     case Item::recordingFov:
@@ -180,6 +188,8 @@ float numberOf(Item item, const Values& v) {
         return static_cast<float>(v.softRelease);
     case Item::slingshotSpeed:
         return static_cast<float>(v.slingshotSpeed);
+    case Item::recordingSmoothing:
+        return static_cast<float>(v.recordingSmoothing);
     case Item::nearClip:
         return static_cast<float>(v.nearClipMm);
     case Item::recordingFov:
@@ -281,6 +291,7 @@ Values sanitized(Values v) {
     v.elasticWeb = std::clamp(v.elasticWeb, 0, 3);
     v.softRelease = std::clamp(v.softRelease, 0, 3);
     v.slingshotSpeed = v.slingshotSpeed <= 0 ? 0 : std::clamp(v.slingshotSpeed, 20, 300);
+    v.recordingSmoothing = std::clamp(v.recordingSmoothing, 0, 100);
     v.nearClipMm = std::clamp(v.nearClipMm, nearClips[0], std::end(nearClips)[-1]);
     v.recordingFov = recording_fov::sanitized(v.recordingFov);
     v.uiStyle = std::clamp(v.uiStyle, uiStyles[0], std::end(uiStyles)[-1]);
@@ -297,9 +308,9 @@ Values sanitized(Values v) {
     v.automaticHandThreshold = std::clamp(v.automaticHandThreshold, 50, 300);
     return v;
 }
-const std::array<Row, 57>& rows() {
+const std::array<Row, 58>& rows() {
     // The help fits the game's description column beside the rows.
-    static const std::array<Row, 57> all{{
+    static const std::array<Row, 58> all{{
         {Item::none, "WEBS", nullptr, {}},
         {Item::webStyle, "WEB STYLE",
          "Arcade: webs pass lamp posts, signs and cars, and swings stay above the street.", webStyleChoices},
@@ -379,8 +390,11 @@ const std::array<Row, 57>& rows() {
         {Item::nearClip, "NEAR CLIP",
          "How near your eyes things still show. Nearer keeps your hands in view.", nearClipChoices},
         {Item::recordingFov, "RECORDING FOV",
-         "A wider view on the monitor, to record. Costs frame rate; no Spidy marks there.",
+         "A view this wide on the monitor to record. Costs frame rate; no Spidy marks.",
          recordingFovChoices},
+        {Item::recordingSmoothing, "RECORDING SMOOTHING",
+         "Softens how the recording view turns, not the headset's. Higher is softer.",
+         recordingSmoothingChoices},
         {Item::none, "BODY", nullptr, {}},
         {Item::calibrate, "CALIBRATE BODY",
          "Fit Spider-Man to you: pick ON RESUME, then hold both triggers in a T-pose.", calibrateChoices},
@@ -511,6 +525,9 @@ bool choose(Item item, int index, Values& v) {
     case Item::slingshotSpeed:
         v.slingshotSpeed = s[index];
         break;
+    case Item::recordingSmoothing:
+        v.recordingSmoothing = s[index];
+        break;
     case Item::nearClip:
         v.nearClipMm = s[index];
         break;
@@ -599,6 +616,7 @@ constexpr TabOnly tabOnly[] = {
     {"soft_release", nullptr, &Values::softRelease},
     {"swing_assist", &Values::swingAssist, nullptr},
     {"slingshot_speed", nullptr, &Values::slingshotSpeed},
+    {"recording_smoothing", nullptr, &Values::recordingSmoothing},
 };
 } // namespace
 std::string tabOnlyText(const Values& v) {

@@ -186,9 +186,9 @@ def main():
         step('hud_small', dict(hud=1, body_haptics=75), changes=11)
         press('left', wait=.8)
         step('hud_off', dict(hud=0), changes=12)
-        # Down past UI STYLE, COMBAT VISUALS, NEAR CLIP, RECORDING FOV and the BODY heading: a calibration at
-        # the next gameplay.
-        press('down', 'down', 'down', 'down', 'down')
+        # Down past UI STYLE, COMBAT VISUALS, NEAR CLIP, RECORDING FOV, RECORDING SMOOTHING and the BODY
+        # heading: a calibration at the next gameplay.
+        press('down', 'down', 'down', 'down', 'down', 'down')
         press('right', wait=.8)
         step('calibrate_on_resume', dict(calibrate=True, hud=0), changes=13)
         # Down past HEIGHT, SEATED and the EXPERIMENTAL heading: the flips, off until switched on.

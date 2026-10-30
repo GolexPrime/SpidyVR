@@ -2050,9 +2050,12 @@ void App::options(ImVec2 origin, ImVec2 size) {
                              static_cast<int>(std::size(kMonitorRateValues)), &o.monitorRate);
                });
         option("Recording FOV",
-               "A wider view on the monitor to record, at least this wide across, instead of your left "
-               "eye. Costs frame rate; Spidy's marks stay in the headset.",
+               "A view of its own on the monitor to record, this wide across, instead of your left eye. "
+               "Costs frame rate; Spidy's marks stay in the headset.",
                S(150), [&] { tabCombo("##recordingfov", Item::recordingFov); });
+        option("Recording smoothing",
+               "How softly the recording view turns with your head; the headset's view is never smoothed.",
+               S(150), [&] { tabCombo("##recordingsmoothing", Item::recordingSmoothing); });
     });
     // A way round a display driver error as VR starts (PLAYERS.md), apart from the monitor's options since
     // October 25: beside them it read as one of them, and Recording FOV does nothing while it is on.

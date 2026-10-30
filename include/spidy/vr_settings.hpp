@@ -160,6 +160,10 @@ struct Values {
     // SLINGSHOT SPEED): 0, its launch as before, under the swing's speed
     // limit; 20 to 300 its own (Swing::setSlingshotSpeed; pull request #45).
     int slingshotSpeed = 0;
+    // How smoothly RECORDING FOV's window view turns with the head (the tab's
+    // RECORDING SMOOTHING): 0 off; 10 to 100, slower and slower. The
+    // headset's view is never smoothed (pull request #46).
+    int recordingSmoothing = 0;
     bool operator==(const Values&) const = default;
 };
 inline constexpr int eyeAimShots = 1, eyeAimZips = 2;
@@ -258,8 +262,9 @@ enum class Item : uint8_t {
     softRelease,
     swingAssist,
     slingshotSpeed,
+    recordingSmoothing,
 };
-inline constexpr Item lastItem = Item::slingshotSpeed;
+inline constexpr Item lastItem = Item::recordingSmoothing;
 // Where a row shows: in the tab; on the pause menu's first page instead,
 // under RESUME: VR VIEW (the user, October 15: "move the VIEW: GAME SCREEN to
 // the first menu (the one with resume)"); or only in the launcher's options:
@@ -282,7 +287,7 @@ struct Row {
     std::span<const char* const> choices{};
     Place place{};
 };
-const std::array<Row, 57>& rows();
+const std::array<Row, 58>& rows();
 // The most choices a row shows (game_menu's buffers): a row with more would
 // lose its last ones.
 inline constexpr size_t maxChoices = 9;

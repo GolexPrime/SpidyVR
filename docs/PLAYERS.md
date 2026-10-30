@@ -115,9 +115,10 @@ frame rate" in the launcher's options chooses Every frame, 60, 30, 15 or 5 a
 second; 60 makes a smoother recording of the window. On menus, cutscenes
 and the flat screen the window shows the game as usual. For a wider view
 to record, pick an angle for RECORDING FOV (the SPIDY VR tab, DISPLAY): the
-window then shows the game's own view, at least that wide across, with none
-of Spidy's marks, every frame whatever the monitor frame rate, and it costs
-frame rate in the headset.
+window then shows the game's own view, that wide across, with none of
+Spidy's marks, every frame whatever the monitor frame rate, and it costs
+frame rate in the headset. RECORDING SMOOTHING softens how that view turns
+with your head; the headset's own view is never smoothed.
 
 The picture in each eye is anti-aliased and upscaled by the game itself:
 the scene is rendered smaller and built up to the eye's full size from the
@@ -797,12 +798,15 @@ VR settings
                    your eyes things still show, 2 cm unless you change it
                    (1 to 10 cm; the game's own camera keeps 10 cm, which
                    hid hands held up before your face). RECORDING FOV (OFF
-                   unless you pick 130, 140 or 150 degrees): the game window
-                   on your monitor shows a wider view to record, at least
+                   unless you pick 70 to 160 degrees): the game window
+                   on your monitor shows a view of its own to record,
                    that wide across, instead of your left eye. It costs
                    frame rate (about 3 ms a frame on its author's PC), and
                    what Spidy draws itself (its gloves and webs, the aim
                    markers, the combat marks) is only in the headset then.
+                   RECORDING SMOOTHING (OFF unless you pick 10 to 100):
+                   that view turns with your head more and more softly;
+                   the headset's view never does.
   BODY ........... CALIBRATE BODY: set it to ON RESUME and resume, and the
                    T-pose panel asks for your measurements again. HEIGHT
                    (AUTO unless you pick one, 150 to 190 cm): your height.
@@ -858,7 +862,7 @@ VR settings
   Changes apply at once. The launcher starts your next session with them;
   its options show every one of them but VR VIEW too.
   NEAR CLIP, RECORDING FOV, UI STYLE, BLOW SOUNDS, HEIGHT, SEATED, EYE AIM, SMART ANCHOR, ELASTIC WEB, SOFT RELEASE, SWING
-  ASSIST, SLINGSHOT SPEED, the four body haptics switches and the
+  ASSIST, SLINGSHOT SPEED, RECORDING SMOOTHING, the four body haptics switches and the
   CONTROLLED FLIPS and EXPERIMENTAL rows below FLIP SPEED Spidy keeps in
   %APPDATA%\Spidy\spidy_vr.ini, beside the launcher's own settings; the
   launcher shows realistic flips' ten rows while it is on, and the body
@@ -880,11 +884,11 @@ VR settings
 Settings profiles (share your settings, or try someone else's)
   "Profile", at the top of the launcher's Options tab, keeps sets of settings
   and switches between them. A profile holds every setting of the SPIDY VR
-  tab but RECORDING FOV, the ones in spidy_vr.ini too (NEAR CLIP, UI STYLE,
+  tab but RECORDING FOV and SMOOTHING, the ones in spidy_vr.ini too (NEAR CLIP, UI STYLE,
   BLOW SOUNDS, the body haptics switches, the EXPERIMENTAL rows), and the
   four realistic flips settings only the launcher shows. Not
   your graphics options (render resolution, upscaling, the game window, the
-  monitor and its RECORDING FOV, the game's depth of field and sharpening),
+  monitor and its RECORDING FOV and SMOOTHING, the game's depth of field and sharpening),
   which suit your own PC, and not your body calibration: a profile leaves
   those as they are.
   Save as a profile ... keeps your settings under a name. Pick a profile in

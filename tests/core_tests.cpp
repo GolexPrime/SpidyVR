@@ -40,6 +40,7 @@
 #include "spidy/punch.hpp"
 #include "spidy/shooter.hpp"
 #include "spidy/slow_motion.hpp"
+#include "spidy/spectator_smoothing.hpp"
 #include "spidy/hand_pose.hpp"
 #include "spidy/impact_sound.hpp"
 #include "spidy/web_strike.hpp"
@@ -21118,8 +21119,8 @@ int main() {
         // The sections (the player, October 19: "sort the options in spidy vr
         // settings ingame into nice sections"), each with a setting in the tab.
         const std::pair<size_t, const char*> sections[] = {{0, "WEBS"},     {6, "SWINGING"}, {15, "COMFORT"},
-                                                           {18, "HAPTICS"}, {26, "DISPLAY"}, {35, "BODY"},
-                                                           {39, "EXPERIMENTAL"}};
+                                                           {18, "HAPTICS"}, {26, "DISPLAY"}, {36, "BODY"},
+                                                           {40, "EXPERIMENTAL"}};
         check(headings == std::size(sections),
               "the sections: webs, swinging, comfort, haptics, display, body, experimental");
         for (const auto& [at, title] : sections) {
@@ -21131,33 +21132,33 @@ int main() {
         }
         // BODY: the calibration, then your height and seated play (the user, October 23: "add proper height
         // calibration or override for seated mode").
-        check(all[36].item == Item::calibrate && all[37].item == Item::height &&
-                  all[37].choices.size() == std::size(heights) && std::strcmp(all[37].choices[0], "AUTO") == 0 &&
-                  std::strcmp(all[37].choices[8], "190 CM") == 0 && all[38].item == Item::seated &&
-                  all[38].choices.empty(),
+        check(all[37].item == Item::calibrate && all[38].item == Item::height &&
+                  all[38].choices.size() == std::size(heights) && std::strcmp(all[38].choices[0], "AUTO") == 0 &&
+                  std::strcmp(all[38].choices[8], "190 CM") == 0 && all[39].item == Item::seated &&
+                  all[39].choices.empty(),
               "BODY: CALIBRATE BODY, then HEIGHT (AUTO, 150 to 190 cm), then SEATED, a switch");
-        check(all[40].item == Item::flips && all[40].choices.empty() && std::strcmp(all[39].title, "EXPERIMENTAL") == 0,
+        check(all[41].item == Item::flips && all[41].choices.empty() && std::strcmp(all[40].title, "EXPERIMENTAL") == 0,
               "the flips: a switch under EXPERIMENTAL");
-        check(all[42].item == Item::flipSpeed && all[42].choices.size() == std::size(flipSpeeds),
+        check(all[43].item == Item::flipSpeed && all[43].choices.size() == std::size(flipSpeeds),
               "the flip speed under the flips");
-        check(all[43].item == Item::handClimb && all[43].choices.empty(),
+        check(all[44].item == Item::handClimb && all[44].choices.empty(),
               "hand wall climbing switch under the flips");
         const Item realistic[] = {Item::realisticFlips,        Item::automaticStrength,    Item::automaticSpeed,
                                   Item::automaticMinimumSpeed, Item::automaticReleaseFlip, Item::automaticResponse,
                                   Item::automaticHandStrength, Item::automaticFalloff,     Item::automaticHandThreshold,
                                   Item::automaticAirBrake,     Item::automaticCombat};
-        check(all.size() == 46 + std::size(realistic), "the realistic flips' rows are not the last");
+        check(all.size() == 47 + std::size(realistic), "the realistic flips' rows are not the last");
         for (size_t i = 0; i < std::size(realistic); ++i)
-            check(all[46 + i].item == realistic[i], "the realistic flips' rows out of order");
-        check(std::strcmp(all[46].title, "REALISTIC FLIPS") == 0 && all[46].choices.empty(),
+            check(all[47 + i].item == realistic[i], "the realistic flips' rows out of order");
+        check(std::strcmp(all[47].title, "REALISTIC FLIPS") == 0 && all[47].choices.empty(),
               "realistic flips: a switch, first of its rows");
-        check(all[41].item == Item::controlledFlips && all[44].item == Item::wallRunCameraTilt, "custom switches misplaced");
+        check(all[42].item == Item::controlledFlips && all[45].item == Item::wallRunCameraTilt, "custom switches misplaced");
         // EYE AIM, before the realistic flips: what the eyes aim, off by default (only a headset that tracks
         // the eyes can).
-        check(all[45].item == Item::eyeAim && std::strcmp(all[45].title, "EYE AIM") == 0 &&
-                  all[45].choices.size() == 4 && std::strcmp(all[45].choices[0], "OFF") == 0 &&
-                  std::strcmp(all[45].choices[1], "WEB BALLS") == 0 && std::strcmp(all[45].choices[2], "ZIPS") == 0 &&
-                  std::strcmp(all[45].choices[3], "BOTH") == 0 && all[45].place == Place::tab,
+        check(all[46].item == Item::eyeAim && std::strcmp(all[46].title, "EYE AIM") == 0 &&
+                  all[46].choices.size() == 4 && std::strcmp(all[46].choices[0], "OFF") == 0 &&
+                  std::strcmp(all[46].choices[1], "WEB BALLS") == 0 && std::strcmp(all[46].choices[2], "ZIPS") == 0 &&
+                  std::strcmp(all[46].choices[3], "BOTH") == 0 && all[46].place == Place::tab,
               "EYE AIM: OFF, WEB BALLS, ZIPS, BOTH, in the tab before the realistic flips");
         {
             Values v;
@@ -21199,8 +21200,13 @@ int main() {
               "the near clip under the UI style: 1 to 10 cm");
         check(all[34].item == Item::recordingFov && std::strcmp(all[34].title, "RECORDING FOV") == 0 &&
                   all[34].choices.size() == std::size(recording_fov::choices) &&
-                  std::strcmp(all[34].choices[0], "OFF") == 0 && std::strcmp(all[34].choices[3], "150\xC2\xB0") == 0,
-              "the recording FOV last under DISPLAY: OFF, then 130 to 150 degrees");
+                  std::strcmp(all[34].choices[0], "OFF") == 0 &&
+                  std::strcmp(all[34].choices[1], "70\xC2\xB0") == 0 &&
+                  std::strcmp(all[34].choices[8], "160\xC2\xB0") == 0,
+              "the recording FOV under DISPLAY: OFF, then 70 to 160 degrees");
+        check(all[35].item == Item::recordingSmoothing && all[35].choices.size() == 9 &&
+                  std::strcmp(all[35].choices[0], "OFF") == 0,
+              "the recording smoothing last under DISPLAY: OFF, then 10 to 100");
         // Webs are always physical (the user, October 15: "remove non physical web, no need for it").
         for (const auto& row : all)
             check(std::strcmp(row.title, "PHYSICAL WEBS") != 0, "webs can still be made non-physical");
@@ -21219,7 +21225,7 @@ int main() {
                                                          : Place::tab),
                   "a row in the wrong place");
         }
-        check(std::count_if(all.begin(), all.end(), [](const Row& r) { return r.place == Place::tab; }) == 52,
+        check(std::count_if(all.begin(), all.end(), [](const Row& r) { return r.place == Place::tab; }) == 53,
               "the tab's own rows");
         check(all[1].item == Item::webStyle && std::strcmp(all[1].title, "WEB STYLE") == 0 &&
                   all[1].choices.size() == 2 && std::strcmp(all[1].choices[0], "REALISTIC") == 0 &&
@@ -21241,8 +21247,8 @@ int main() {
                   all[23].item == Item::hapticWind && all[24].item == Item::hapticCombat &&
                   all[25].item == Item::hapticMovement && all[22].choices.empty() && all[25].choices.empty(),
               "HAPTICS: the vibration, body haptics, then the web, wind, combat and movement switches");
-        check(all[36].item == Item::calibrate && all[36].choices.size() == 2 &&
-                  std::strcmp(all[36].choices[1], "ON RESUME") == 0,
+        check(all[37].item == Item::calibrate && all[37].choices.size() == 2 &&
+                  std::strcmp(all[37].choices[1], "ON RESUME") == 0,
               "the body's calibration: NO, or ON RESUME");
         // Every setting has a row.
         constexpr uint64_t everySetting = (uint64_t{2} << static_cast<unsigned>(lastItem)) - 2;
@@ -21301,11 +21307,12 @@ int main() {
             check(withTabOnly(Values{}, tabOnlyText(v)).recordingFov == v.recordingFov,
                   "the recording FOV did not come back from the tab's own file");
         }
-        check(!choose(Item::recordingFov, 4, v) && !choose(Item::recordingFov, -1, v), "a choice out of range taken");
-        // Off at 0 or below, else 130-150: a hand-written 100 shows as 130.
+        check(!choose(Item::recordingFov, 9, v) && !choose(Item::recordingFov, -1, v), "a choice out of range taken");
+        // Off at 0 or below, else 70-160: a hand-written 60 shows as 70.
         check(withTabOnly(Values{}, "recording_fov=-20\n").recordingFov == 0 &&
-                  withTabOnly(Values{}, "recording_fov=100\n").recordingFov == 130 &&
-                  withTabOnly(Values{}, "recording_fov=170\n").recordingFov == 150,
+                  withTabOnly(Values{}, "recording_fov=60\n").recordingFov == 70 &&
+                  withTabOnly(Values{}, "recording_fov=100\n").recordingFov == 100 &&
+                  withTabOnly(Values{}, "recording_fov=170\n").recordingFov == 160,
               "the recording FOV's range");
         // The window's shape, at least the angle across, centred, and never
         // less than the eyes' lens (lopsided here, and taller than 16:9).
@@ -21329,6 +21336,43 @@ int main() {
             near(recording_fov::covering(quest, degrees, 16.f / 9).right, std::tan(degrees * .00872664626f), .0001f);
         near(2 * std::atan(recording_fov::covering(quest, 0, 16.f / 9).right) * 57.2957795f, 128.5f, .1f);
     });
+    test("recording smoothing: OFF, then 10 to 100, kept in spidy_vr.ini; it turns, never moves", [] {
+        using namespace vr_settings;
+        Values v;
+        check(v.recordingSmoothing == 0, "smoothing started on");
+        for (int i = 0; i < static_cast<int>(steps(Item::recordingSmoothing).size()); ++i) {
+            check(choose(Item::recordingSmoothing, i, v) == (i > 0) &&
+                      choice(Item::recordingSmoothing, v) == i,
+                  "strength did not round trip");
+            check(withTabOnly(Values{}, tabOnlyText(v)).recordingSmoothing == v.recordingSmoothing,
+                  "strength did not save");
+        }
+        check(!choose(Item::recordingSmoothing, 9, v) && v.recordingSmoothing == 100,
+              "a choice out of range taken");
+        Mat4 initial{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+        auto target = initial;
+        const auto turn = Quat::around({1, 1, 1}, .5f);
+        for (int r = 0; r < 3; ++r) {
+            const auto q = turn.rotate({initial[r * 4], initial[r * 4 + 1], initial[r * 4 + 2]});
+            target[r * 4] = q.x;
+            target[r * 4 + 1] = q.y;
+            target[r * 4 + 2] = q.z;
+        }
+        target[12] = .2f;
+        target[13] = .3f;
+        target[14] = .4f;
+        SpectatorSmoothing filter;
+        filter.update(initial, .01f, true, 150);
+        const auto smooth = filter.update(target, .01f, true, 150);
+        near(smooth[12], .2f);
+        near(smooth[13], .3f);
+        near(smooth[14], .4f);
+        check(std::abs(smooth[0] - target[0]) > .001f, "rotation was not smoothed");
+        filter.reset();
+        const auto off = filter.update(target, .01f, false, 150);
+        for (int i = 0; i < 16; ++i)
+            near(off[i], target[i]);
+    });
     test("VR settings only the tab offers: kept as key=value lines, read back sanitized, the rest left", [] {
         using namespace vr_settings;
         const Values defaults;
@@ -21342,7 +21386,7 @@ int main() {
                                        "body_haptics_movement=1\nrecording_fov=0\nui_style=0\ncombat_visuals=1\nblow_sounds=0\n"
                                        "web_slingshot=0\nbetter_climbing=0\nheight_cm=0\nseated=0\neye_aim=0\n"
                                        "smart_anchor=0\nelastic_web=0\nsoft_release=0\nswing_assist=0\n"
-                                       "slingshot_speed=0\n",
+                                       "slingshot_speed=0\nrecording_smoothing=0\n",
               "the defaults' text");
         Values changed = defaults;
         changed.recordingFov = 140;

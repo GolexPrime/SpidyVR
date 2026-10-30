@@ -551,7 +551,7 @@ int main() {
                 continue;
             const bool leftOut = row.item == Item::view || row.item == Item::calibrate ||
                                  row.item == Item::height || row.item == Item::recordingFov ||
-                                 row.item == Item::eyeAim;
+                                 row.item == Item::eyeAim || row.item == Item::recordingSmoothing;
             check(std::count_if(begin, end, [&](const ProfileSetting& s) { return s.item == row.item; }) ==
                       (leftOut ? 0 : 1),
                   row.title);
@@ -561,7 +561,8 @@ int main() {
         size_t lines = 0;
         for (size_t line = 0; line < tabOnly.size(); line = tabOnly.find('\n', line) + 1) {
             const std::string key = tabOnly.substr(line, tabOnly.find('=', line) - line);
-            if (key == "recording_fov" || key == "height_cm" || key == "eye_aim")
+            if (key == "recording_fov" || key == "recording_smoothing" || key == "height_cm" ||
+                key == "eye_aim")
                 continue;
             ++lines;
             check(at(key) < std::size(profileSettings) &&
@@ -671,6 +672,7 @@ int main() {
         t.softRelease = 3;
         t.swingAssist = true;
         t.slingshotSpeed = 200;
+        t.recordingSmoothing = 50;
         t.nearClipMm = 10;
         t.automaticStrength = 75;
         t.automaticSpeed = 360;
