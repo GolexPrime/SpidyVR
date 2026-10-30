@@ -158,8 +158,8 @@ def main():
         step('air_webs_off', dict(air_webs=False), changes=4)
         press('x', wait=.8)
         step('air_webs_reset', dict(air_webs=True), changes=5)
-        # Down past SMART ANCHOR and the SWINGING heading.
-        press('down', 'down')
+        # Down past SMART ANCHOR, WEB RANGE, WEB SPEED and the SWINGING heading.
+        press('down', 'down', 'down', 'down')
         press('right', wait=.8)
         step('swing_speed_40', dict(swing_speed=40.0), changes=6)
         press('down')

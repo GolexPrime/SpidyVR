@@ -99,6 +99,14 @@ static_assert(std::size(slingshotSpeedChoices) == std::size(slingshotSpeeds));
 constexpr int recordingSmoothings[] = {0, 10, 20, 30, 40, 50, 60, 80, 100};
 constexpr const char* recordingSmoothingChoices[] = {"OFF", "10", "20", "30", "40", "50", "60", "80", "100"};
 static_assert(std::size(recordingSmoothingChoices) == std::size(recordingSmoothings));
+// WEB RANGE, m, and WEB SPEED (off, then slow to fast).
+constexpr int webRanges[] = {10, 25, 50, 100, 150, 200, 300, 500, 1000};
+constexpr const char* webRangeChoices[] = {"10 M",  "25 M",  "50 M",  "100 M", "150 M",
+                                           "200 M", "300 M", "500 M", "1000 M"};
+static_assert(std::size(webRangeChoices) == std::size(webRanges));
+constexpr int webSpeeds[] = {0, 1, 2, 3};
+constexpr const char* webSpeedChoices[] = {"OFF", "SLOW", "MEDIUM", "FAST"};
+static_assert(std::size(webSpeedChoices) == std::size(webSpeeds));
 } // namespace
 
 std::span<const int> steps(Item item) {
@@ -129,6 +137,10 @@ std::span<const int> steps(Item item) {
         return slingshotSpeeds;
     case Item::recordingSmoothing:
         return recordingSmoothings;
+    case Item::webRange:
+        return webRanges;
+    case Item::webSpeed:
+        return webSpeeds;
     case Item::nearClip:
         return nearClips;
     case Item::recordingFov:
@@ -190,6 +202,10 @@ float numberOf(Item item, const Values& v) {
         return static_cast<float>(v.slingshotSpeed);
     case Item::recordingSmoothing:
         return static_cast<float>(v.recordingSmoothing);
+    case Item::webRange:
+        return static_cast<float>(v.webRange);
+    case Item::webSpeed:
+        return static_cast<float>(v.webSpeed);
     case Item::nearClip:
         return static_cast<float>(v.nearClipMm);
     case Item::recordingFov:
@@ -296,6 +312,8 @@ Values sanitized(Values v) {
     v.softRelease = std::clamp(v.softRelease, 0, 3);
     v.slingshotSpeed = v.slingshotSpeed <= 0 ? 0 : std::clamp(v.slingshotSpeed, 20, 300);
     v.recordingSmoothing = std::clamp(v.recordingSmoothing, 0, 100);
+    v.webRange = std::clamp(v.webRange, 10, 1000);
+    v.webSpeed = std::clamp(v.webSpeed, 0, 3);
     v.nearClipMm = std::clamp(v.nearClipMm, nearClips[0], std::end(nearClips)[-1]);
     v.recordingFov = recording_fov::sanitized(v.recordingFov);
     v.uiStyle = std::clamp(v.uiStyle, uiStyles[0], std::end(uiStyles)[-1]);
@@ -312,9 +330,9 @@ Values sanitized(Values v) {
     v.automaticHandThreshold = std::clamp(v.automaticHandThreshold, 50, 300);
     return v;
 }
-const std::array<Row, 60>& rows() {
+const std::array<Row, 62>& rows() {
     // The help fits the game's description column beside the rows.
-    static const std::array<Row, 60> all{{
+    static const std::array<Row, 62> all{{
         {Item::none, "WEBS", nullptr, {}},
         {Item::webStyle, "WEB STYLE",
          "Arcade: webs pass lamp posts, signs and cars, and swings stay above the street.", webStyleChoices},
@@ -323,12 +341,16 @@ const std::array<Row, 60>& rows() {
         {Item::aimMarkers, "AIM MARKERS", "Show where each web would land.", {}},
         {Item::airWebs,
          "WEBS HOLD IN OPEN AIR",
-         "With nothing in reach, a web still holds in open air, 100 m out.",
+         "With nothing in reach, a web still holds in open air, as far out as WEB RANGE.",
          {}},
         {Item::smartAnchor,
          "SMART ANCHOR",
          "With open-air webs off, a near miss catches a real surface in a small cone.",
          {}},
+        {Item::webRange, "WEB RANGE", "How far a web reaches; an open-air web holds this far out.",
+         webRangeChoices},
+        {Item::webSpeed, "WEB SPEED", "Webs fly to where they stick, then catch you softly. Off: at once.",
+         webSpeedChoices},
         {Item::none, "SWINGING", nullptr, {}},
         {Item::swingSpeed, "SWING SPEED LIMIT", "How fast a swing can carry you.", swingChoices},
         {Item::weight, "WEIGHT",
@@ -536,6 +558,12 @@ bool choose(Item item, int index, Values& v) {
     case Item::recordingSmoothing:
         v.recordingSmoothing = s[index];
         break;
+    case Item::webRange:
+        v.webRange = s[index];
+        break;
+    case Item::webSpeed:
+        v.webSpeed = s[index];
+        break;
     case Item::nearClip:
         v.nearClipMm = s[index];
         break;
@@ -627,6 +655,8 @@ constexpr TabOnly tabOnly[] = {
     {"recording_smoothing", nullptr, &Values::recordingSmoothing},
     {"two_hand_zip", &Values::twoHandZip, nullptr},
     {"rope_steering", &Values::ropeSteering, nullptr},
+    {"web_range_m", nullptr, &Values::webRange},
+    {"web_speed", nullptr, &Values::webSpeed},
 };
 } // namespace
 std::string tabOnlyText(const Values& v) {

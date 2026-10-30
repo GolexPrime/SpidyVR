@@ -264,10 +264,11 @@ void previewAims(const Command& c, const Input& in, const Body& player, const Wo
     InterlockedIncrement64(&SpidyAimData.sequence);
     ReleaseSRWLockExclusive(&output);
 }
-// BETTER CLIMBING or the hand gestures, standing with no native step to
-// drive: the swing still takes the hands, so that a pull down a shared web
-// (pull request #44) or a two hand zip (#47) leaves the ground by the
-// game's own takeoff, no jump pressed.
+// BETTER CLIMBING, the hand gestures or WEB SPEED, standing with no native
+// step to drive: the swing still takes the hands, so that a pull down a
+// shared web (pull request #44), a two hand zip (#47) or a web that has
+// flown there (#48) leaves the ground by the game's own takeoff, no jump
+// pressed.
 void idleRopeInput(const Command& c, const Input& in, const native_rays::QueryContext& world,
                    const Body& player, const native_movement::Data& motion, int64_t qpc) {
     const float elapsed = inputClock.consume(c);
@@ -290,7 +291,7 @@ void idleRopeInput(const Command& c, const Input& in, const native_rays::QueryCo
         }
     }
     for (const auto& web : solver.webs())
-        attached |= web.attached;
+        attached |= web.ready();
     launched |= solver.gestureTakeoff();
     const bool lift = solver.climbTakeoff() || launched || (!solver.slingshotEnabled() && newAttach);
     const auto transition =
@@ -578,7 +579,7 @@ void visit(const native_rays::QueryContext& world) {
         return;
     }
     if (focused && nativeFloor && !owned && !handCrawl && (!fresh || motion.steps == lastStep) &&
-        (solver.betterClimbingEnabled() || solver.gesturesEnabled())) {
+        (solver.betterClimbingEnabled() || solver.gesturesEnabled() || solver.webTravelEnabled())) {
         idleRopeInput(c, in, world, player, motion, now.QuadPart);
         return;
     }
@@ -730,7 +731,7 @@ void visit(const native_rays::QueryContext& world) {
         cancel();
         return;
     }
-    const bool attached = solver.webs()[0].attached || solver.webs()[1].attached;
+    const bool attached = solver.webs()[0].ready() || solver.webs()[1].ready();
     bool pointLaunched{}, newAttachment{}, zipped{}, slingshotLaunched{};
     for (const auto& event : solver.events()) {
         // A charged leap leaves the ground as a point launch does: by the
@@ -765,7 +766,7 @@ void visit(const native_rays::QueryContext& world) {
     Vec3 requested = limited(average, cap);
     bool overhead{};
     for (const auto& web : solver.webs())
-        overhead |= web.attached && web.anchor.y > body.position.y + .5f;
+        overhead |= web.ready() && web.anchor.y > body.position.y + .5f;
     // With the slingshot on, a web shot on the ground lifts nothing by
     // itself; the reel still does.
     const bool wantsLift = in.jump || pointLaunched || solver.climbTakeoff() ||
@@ -1189,7 +1190,7 @@ extern "C" __declspec(dllexport) DWORD WINAPI SpidySwingSettings(void* input) {
          header[2] != settingsBytesV9 && header[2] != settingsBytesV10 && header[2] != settingsBytesV11 &&
          header[2] != settingsBytesV12 && header[2] != settingsBytesV13 && header[2] != settingsBytesV14 &&
          header[2] != settingsBytesV15 && header[2] != settingsBytesV16 && header[2] != settingsBytesV17 &&
-         header[2] != sizeof(s)) ||
+         header[2] != settingsBytesV18 && header[2] != settingsBytesV19 && header[2] != sizeof(s)) ||
         !copy(&s, input, header[2]) || !validSettings(s))
         return 2001;
     AcquireSRWLockExclusive(&lifecycle);
@@ -1246,6 +1247,8 @@ extern "C" __declspec(dllexport) DWORD WINAPI SpidySwingSettings(void* input) {
             solver.setSlingshotSpeed(s.slingshotSpeed);
         if (s.version >= 17)
             solver.allowGestures(s.twoHandZip != 0, s.version >= 18 && s.ropeSteering != 0);
+        if (s.version >= 19)
+            solver.webTravel(s.webRange, s.version >= 20 ? static_cast<int>(s.webSpeed) : 0);
         // A swing started without the grab (-NoWebGrab) offers it from now on.
         if (s.grab && !game_grab::offering() && driveMotion && sampleDriven) {
             config.grabKinds = game_grab::movableKinds;
@@ -1257,6 +1260,20 @@ extern "C" __declspec(dllexport) DWORD WINAPI SpidySwingSettings(void* input) {
     }
     ReleaseSRWLockExclusive(&lifecycle);
     return result;
+}
+extern "C" __declspec(dllexport) DWORD WINAPI SpidyWebFlightSample(void* destination) {
+    WebFlightData data;
+    AcquireSRWLockShared(&simulation);
+    for (unsigned i = 0; i < 2; ++i) {
+        const auto& w = solver.webs()[i];
+        data.phases[i] = !w.attached ? 0 : !w.ready() ? 1 : w.catching ? 2 : 3;
+        data.tips[i] = w.tip();
+        data.durations[i] = w.flightTotal;
+        data.progress[i] = w.progress();
+        data.coupling[i] = w.ready() ? w.coupling() : 0;
+    }
+    ReleaseSRWLockShared(&simulation);
+    return copy(destination, &data, sizeof(data)) ? 0 : 2001;
 }
 extern "C" __declspec(dllexport) DWORD WINAPI SpidySlingshotSample(void* destination) {
     SlingshotData sample;

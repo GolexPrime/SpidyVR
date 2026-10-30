@@ -80,6 +80,8 @@ inline constexpr ProfileSetting profileSettings[] = {
     launcherOption("aim_markers", Item::aimMarkers, &SessionOptions::aimMarkers),
     launcherOption("air_webs", Item::airWebs, &SessionOptions::airWebs),
     tabOnly("smart_anchor", Item::smartAnchor, &Values::smartAnchor),
+    tabOnly("web_range_m", Item::webRange, 10, 1000, &Values::webRange),
+    tabOnly("web_speed", Item::webSpeed, 0, 3, &Values::webSpeed),
     launcherOption("swing_speed", Item::swingSpeed, 10, 65, &SessionOptions::swingSpeed),
     launcherOption("weight", Item::weight, 40, 300, &SessionOptions::weight),
     tabOnly("elastic_web", Item::elasticWeb, 0, 3, &Values::elasticWeb),

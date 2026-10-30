@@ -1821,12 +1821,19 @@ void App::options(ImVec2 origin, ImVec2 size) {
                    stepCombo("##webButton", kWebButtons, buttons, 2, &trigger);
                    o.triggerWebs = trigger != 0;
                });
-        option("Webs hold in open air", "With nothing in reach, a web still holds 100 m out; off, it misses.", S(42),
+        option("Webs hold in open air",
+               "With nothing in reach, a web still holds as far out as Web range; off, it misses.", S(42),
                [&] { changed |= toggle("##air", &o.airWebs); });
         option("Smart anchor",
                "With webs holding in open air off, a web that just misses still catches the real surface "
                "nearest it.",
                S(42), [&] { tabToggle("##smartanchor", Item::smartAnchor); });
+        option("Web range", "How far a web reaches; a web in open air holds this far out.", S(150),
+               [&] { tabCombo("##webrange", Item::webRange); });
+        option("Web speed",
+               "Off, a web sticks at once; or it flies there, visibly, pulls only once it has arrived "
+               "and catches you softly.",
+               S(150), [&] { tabCombo("##webspeed", Item::webSpeed); });
         option("Aim markers", "Show where each hand's web would land.", S(42),
                [&] { changed |= toggle("##aim", &o.aimMarkers); });
         option("Eye aim",

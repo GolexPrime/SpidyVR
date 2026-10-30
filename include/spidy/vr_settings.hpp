@@ -169,6 +169,12 @@ struct Values {
     // STEERING, the free hand on your web too pulls sideways to turn the
     // swing (Swing::allowGestures).
     bool twoHandZip = false, ropeSteering = false;
+    // How far a web reaches, open-air webs too, m (the tab's WEB RANGE; 100
+    // as before), and how fast it flies there (WEB SPEED): 0 it sticks at
+    // once, as before; 1 to 3 it flies at 60, 150 or 350 m/s, pulls only
+    // once it has arrived and catches softly (Swing::webTravel; pull
+    // request #48).
+    int webRange = 100, webSpeed = 0;
     bool operator==(const Values&) const = default;
 };
 inline constexpr int eyeAimShots = 1, eyeAimZips = 2;
@@ -270,8 +276,10 @@ enum class Item : uint8_t {
     recordingSmoothing,
     twoHandZip,
     ropeSteering,
+    webRange,
+    webSpeed,
 };
-inline constexpr Item lastItem = Item::ropeSteering;
+inline constexpr Item lastItem = Item::webSpeed;
 // Where a row shows: in the tab; on the pause menu's first page instead,
 // under RESUME: VR VIEW (the user, October 15: "move the VIEW: GAME SCREEN to
 // the first menu (the one with resume)"); or only in the launcher's options:
@@ -294,7 +302,7 @@ struct Row {
     std::span<const char* const> choices{};
     Place place{};
 };
-const std::array<Row, 60>& rows();
+const std::array<Row, 62>& rows();
 // The most choices a row shows (game_menu's buffers): a row with more would
 // lose its last ones.
 inline constexpr size_t maxChoices = 9;

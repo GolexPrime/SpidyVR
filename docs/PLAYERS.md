@@ -759,10 +759,16 @@ VR settings
                    (GRIP or TRIGGER: the one that shoots and holds a web;
                    the other reels in and shoots web balls); AIM MARKERS;
                    webs holding in open air (a web that meets nothing
-                   within 100 m holds there; off, it misses); SMART
+                   within WEB RANGE holds there; off, it misses); SMART
                    ANCHOR (off until you switch it on): with open-air
                    webs off, a web that just misses, by up to 8
-                   degrees, catches the real surface nearest it.
+                   degrees, catches the real surface nearest it. WEB
+                   RANGE (100 m unless you pick 10 to 1000 m): how far a
+                   web reaches, and how far out an open-air web holds.
+                   WEB SPEED (OFF unless you pick SLOW, MEDIUM or FAST):
+                   a web flies to where it sticks, and you see it go;
+                   it pulls only once it has arrived, and catches you
+                   softly then. OFF, it sticks at once, as before.
   SWINGING ....... the swing speed limit and your weight. ELASTIC WEB (OFF
                    unless you pick LOW, MEDIUM or HIGH): webs stretch
                    under your weight and catch you more softly, softest
@@ -867,8 +873,10 @@ VR settings
                    Desktop: its eye tracking forwarding).
   Changes apply at once. The launcher starts your next session with them;
   its options show every one of them but VR VIEW too.
-  NEAR CLIP, RECORDING FOV, UI STYLE, BLOW SOUNDS, HEIGHT, SEATED, EYE AIM, SMART ANCHOR, ELASTIC WEB, SOFT RELEASE, SWING
-  ASSIST, SLINGSHOT SPEED, RECORDING SMOOTHING, TWO HAND WEB ZIP, HAND ROPE STEERING, the four body haptics switches and the
+  NEAR CLIP, RECORDING FOV, UI STYLE, BLOW SOUNDS, HEIGHT, SEATED, EYE AIM,
+  SMART ANCHOR, WEB RANGE, WEB SPEED, ELASTIC WEB, SOFT RELEASE, SWING
+  ASSIST, SLINGSHOT SPEED, TWO HAND WEB ZIP, HAND ROPE STEERING, RECORDING
+  SMOOTHING, the four body haptics switches and the
   CONTROLLED FLIPS and EXPERIMENTAL rows below FLIP SPEED Spidy keeps in
   %APPDATA%\Spidy\spidy_vr.ini, beside the launcher's own settings; the
   launcher shows realistic flips' ten rows while it is on, and the body
