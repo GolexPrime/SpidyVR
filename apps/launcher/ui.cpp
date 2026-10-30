@@ -1843,6 +1843,8 @@ void App::options(ImVec2 origin, ImVec2 size) {
         option("Weight", "How heavy you are while swinging and after letting go. 100% is real gravity.", S(150), [&] {
             stepCombo("##weight", kWeights, kWeightValues, static_cast<int>(std::size(kWeightValues)), &o.weight);
         });
+        option("Elastic web", "Webs stretch under load and catch you more softly; higher is softer.", S(150),
+               [&] { tabCombo("##elasticweb", Item::elasticWeb); });
         option("Web slingshot", "No auto jump. Draw two fixed webs, hold for vibration, release both to launch.",
                S(42), [&] { tabToggle("##webslingshot", Item::webSlingshot); });
         option("Better climbing", "Take one web in both hands, then pull hand over hand to keep climbing it.",

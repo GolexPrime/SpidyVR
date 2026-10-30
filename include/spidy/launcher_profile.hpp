@@ -82,6 +82,7 @@ inline constexpr ProfileSetting profileSettings[] = {
     tabOnly("smart_anchor", Item::smartAnchor, &Values::smartAnchor),
     launcherOption("swing_speed", Item::swingSpeed, 10, 65, &SessionOptions::swingSpeed),
     launcherOption("weight", Item::weight, 40, 300, &SessionOptions::weight),
+    tabOnly("elastic_web", Item::elasticWeb, 0, 3, &Values::elasticWeb),
     tabOnly("web_slingshot", Item::webSlingshot, &Values::webSlingshot),
     tabOnly("better_climbing", Item::betterClimbing, &Values::betterClimbing),
     retired("wall_run", 1),

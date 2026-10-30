@@ -144,6 +144,10 @@ struct Values {
     // Only where the headset tracks the eyes (XrRuntime::eyeTracking); 0, or
     // no eye tracker, the hands aim balls and the head zips as before.
     int eyeAim = 0;
+    // How far webs stretch under load (the tab's ELASTIC WEB): 0 off, a hard
+    // rope as before; 1 to 3 softer and softer (Swing::elasticWeb; pull
+    // request #40).
+    int elasticWeb = 0;
     bool operator==(const Values&) const = default;
 };
 inline constexpr int eyeAimShots = 1, eyeAimZips = 2;
@@ -238,8 +242,9 @@ enum class Item : uint8_t {
     combatVisuals,
     eyeAim,
     smartAnchor,
+    elasticWeb,
 };
-inline constexpr Item lastItem = Item::smartAnchor;
+inline constexpr Item lastItem = Item::elasticWeb;
 // Where a row shows: in the tab; on the pause menu's first page instead,
 // under RESUME: VR VIEW (the user, October 15: "move the VIEW: GAME SCREEN to
 // the first menu (the one with resume)"); or only in the launcher's options:
@@ -262,7 +267,7 @@ struct Row {
     std::span<const char* const> choices{};
     Place place{};
 };
-const std::array<Row, 53>& rows();
+const std::array<Row, 54>& rows();
 // The most choices a row shows (game_menu's buffers): a row with more would
 // lose its last ones.
 inline constexpr size_t maxChoices = 9;

@@ -78,12 +78,16 @@ static_assert(std::size(automaticStrengthChoices) == std::size(automaticStrength
 constexpr int screenSizes[] = {0, 1, 2};
 constexpr int hudSizes[] = {0, 1, 2, 3};
 constexpr int depthSteps[] = {0, 1, 2, 3};
+// A level: OFF, then LOW, MEDIUM and HIGH (ELASTIC WEB).
+constexpr int levelSteps[] = {0, 1, 2, 3};
+constexpr const char* levelChoices[] = {"OFF", "LOW", "MEDIUM", "HIGH"};
 static_assert(std::size(swingChoices) == std::size(swingSpeeds) && std::size(snapChoices) == std::size(snapTurns) &&
               std::size(smoothChoices) == std::size(smoothTurns) &&
               std::size(hapticChoices) == std::size(hapticLevels) && std::size(screenChoices) == std::size(screenSizes) &&
               std::size(weightChoices) == std::size(weights) && std::size(hudChoices) == std::size(hudSizes) &&
               std::size(flipSpeedChoices) == std::size(flipSpeeds) &&
               std::size(depthChoices) == std::size(depthSteps) && std::size(depthSteps) == std::size(screenDepths));
+static_assert(std::size(levelChoices) == std::size(levelSteps));
 } // namespace
 
 std::span<const int> steps(Item item) {
@@ -107,6 +111,8 @@ std::span<const int> steps(Item item) {
         return flipSpeeds;
     case Item::screenDepth:
         return depthSteps;
+    case Item::elasticWeb:
+        return levelSteps;
     case Item::nearClip:
         return nearClips;
     case Item::recordingFov:
@@ -160,6 +166,8 @@ float numberOf(Item item, const Values& v) {
         return static_cast<float>(v.flipSpeed);
     case Item::screenDepth:
         return static_cast<float>(v.screenDepth);
+    case Item::elasticWeb:
+        return static_cast<float>(v.elasticWeb);
     case Item::nearClip:
         return static_cast<float>(v.nearClipMm);
     case Item::recordingFov:
@@ -256,6 +264,7 @@ Values sanitized(Values v) {
     v.hud = std::clamp(v.hud, 0, 3);
     v.flipSpeed = std::clamp(v.flipSpeed, 90, 480);
     v.screenDepth = std::clamp(v.screenDepth, 0, 3);
+    v.elasticWeb = std::clamp(v.elasticWeb, 0, 3);
     v.nearClipMm = std::clamp(v.nearClipMm, nearClips[0], std::end(nearClips)[-1]);
     v.recordingFov = recording_fov::sanitized(v.recordingFov);
     v.uiStyle = std::clamp(v.uiStyle, uiStyles[0], std::end(uiStyles)[-1]);
@@ -272,9 +281,9 @@ Values sanitized(Values v) {
     v.automaticHandThreshold = std::clamp(v.automaticHandThreshold, 50, 300);
     return v;
 }
-const std::array<Row, 53>& rows() {
+const std::array<Row, 54>& rows() {
     // The help fits the game's description column beside the rows.
-    static const std::array<Row, 53> all{{
+    static const std::array<Row, 54> all{{
         {Item::none, "WEBS", nullptr, {}},
         {Item::webStyle, "WEB STYLE",
          "Arcade: webs pass lamp posts, signs and cars, and swings stay above the street.", webStyleChoices},
@@ -285,12 +294,16 @@ const std::array<Row, 53>& rows() {
          "WEBS HOLD IN OPEN AIR",
          "With nothing in reach, a web still holds in open air, 100 m out.",
          {}},
-        {Item::smartAnchor, "SMART ANCHOR",
-         "With open-air webs off, a near miss catches a real surface in a small cone.", {}},
+        {Item::smartAnchor,
+         "SMART ANCHOR",
+         "With open-air webs off, a near miss catches a real surface in a small cone.",
+         {}},
         {Item::none, "SWINGING", nullptr, {}},
         {Item::swingSpeed, "SWING SPEED LIMIT", "How fast a swing can carry you.", swingChoices},
         {Item::weight, "WEIGHT",
          "How heavy you are while swinging and after letting go. 100% is real gravity.", weightChoices},
+        {Item::elasticWeb, "ELASTIC WEB", "Webs stretch under load for a softer catch. Higher is softer.",
+         levelChoices},
         {Item::webSlingshot,
          "WEB SLINGSHOT",
          "No auto jump. Draw two fixed webs, hold for vibration, release both to launch.",
@@ -467,6 +480,9 @@ bool choose(Item item, int index, Values& v) {
     case Item::screenDepth:
         v.screenDepth = s[index];
         break;
+    case Item::elasticWeb:
+        v.elasticWeb = s[index];
+        break;
     case Item::nearClip:
         v.nearClipMm = s[index];
         break;
@@ -551,6 +567,7 @@ constexpr TabOnly tabOnly[] = {
     {"seated", &Values::seated, nullptr},
     {"eye_aim", nullptr, &Values::eyeAim},
     {"smart_anchor", &Values::smartAnchor, nullptr},
+    {"elastic_web", nullptr, &Values::elasticWeb},
 };
 } // namespace
 std::string tabOnlyText(const Values& v) {

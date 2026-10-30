@@ -523,6 +523,11 @@ class Swing {
     void allowSmartAnchor(bool on) {
         smartAnchor_ = on;
     }
+    // Webs that stretch under load (0 off, a hard rope; 1 to 3 softer):
+    // a damped spring takes the place of the rope's length limit.
+    void elasticWeb(int level) {
+        elasticWeb_ = std::clamp(level, 0, 3);
+    }
     const SwingConfig& config() const {
         return config_;
     }
@@ -539,6 +544,7 @@ class Swing {
     float slingshotCharge_{}, slingshotHold_{}, slingshotRelease_{}, slingshotYaw_{};
     bool betterClimbing_{};
     bool smartAnchor_{};
+    int elasticWeb_{};
     struct HandState {
         // held: grip squeezed, with release hysteresis. A web shoots only on the
         // press that sets it, so a lost web never re-fires while the grip stays held.
