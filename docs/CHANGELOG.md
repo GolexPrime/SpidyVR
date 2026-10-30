@@ -3,7 +3,41 @@
 Every build, newest first, with what changed, why, and what was measured.
 Per-check results are in [VALIDATION.md](VALIDATION.md).
 
-**Latest build (October 27, eighth): a floor too high is caught by your
+**Latest build (October 30): Spidy 0.7.0, the community patch - twelve pull
+requests.** You: "review open prs and fix what needs fixes, merge whats
+done", then "make a 0.7 release from what you merged - call it community
+patch".
+
+- **tristanlifn (#36): closing a menu no longer ends VR.** Around a menu
+  closing the game can take a few seconds to render a new eye pair while the
+  headset shows the last one, and the watchdog counted only new pairs
+  ("Native eye presentation stalled for 3 seconds"). It ends VR now only
+  when nothing at all reaches the headset for 3 seconds.
+- **AdrianGzzEsc (#37): COMBAT VISUALS off, uppercuts and ground smashes
+  need no hidden call.** Without the arrows there is nothing to follow, so
+  the directional calls are gone with them: an uppercut launches, a blow
+  down knocks a standing enemy down or slams one in the air, finisher count
+  or not.
+- **iplusdvr (#39 to #48), every new setting off or as before until you pick
+  it:** WEB RANGE (10 to 1000 m) and WEB SPEED (a web flies to where it
+  sticks, pulls once it arrives and catches softly), SMART ANCHOR (with
+  open-air webs off, a near miss catches the nearest real surface), ELASTIC
+  WEB, SOFT RELEASE, SWING ASSIST (speed into a wall is cut in time),
+  SLINGSHOT SPEED (up to 300 m/s), BETTER CLIMBING from the ground and on
+  open-air webs, TWO HAND WEB ZIP and HAND ROPE STEERING, HAND MOMENTUM down
+  to 0%, RECORDING FOV from 70 to 160 degrees and RECORDING SMOOTHING.
+- **The review's fixes**, one commit on each branch: the swing settings'
+  versions in sequence (11 to 20; nine pull requests had each taken 11), each
+  new row in its own section with a launcher row, nine choices at most a row,
+  and nothing changed for players who leave the new settings alone (#44's
+  strand check, #48's attach vibration and ray limit). The SPIDY VR tab has
+  62 rows. #38 (JOYSTICK WALL RUN CAMERA, HALF PUNCH DAMAGE) waits for your
+  review: it changes HAND WALL CLIMBING's wall run by default.
+- **Checked:** ctest 3/3 and the six Python protocol suites on the twelve
+  together, built after each step. Not run: the game, a headset (each author
+  played their own feature in their own build).
+
+**Earlier build (October 27, eighth): a floor too high is caught by your
 arms.** You: "height calibration showed very wrong number in one of today's
 sessions - 1.43 or something instead of 1.88".
 
