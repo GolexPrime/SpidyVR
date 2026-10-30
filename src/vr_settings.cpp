@@ -78,7 +78,7 @@ static_assert(std::size(automaticStrengthChoices) == std::size(automaticStrength
 constexpr int screenSizes[] = {0, 1, 2};
 constexpr int hudSizes[] = {0, 1, 2, 3};
 constexpr int depthSteps[] = {0, 1, 2, 3};
-// A level: OFF, then LOW, MEDIUM and HIGH (ELASTIC WEB).
+// A level: OFF, then LOW, MEDIUM and HIGH (ELASTIC WEB, SOFT RELEASE).
 constexpr int levelSteps[] = {0, 1, 2, 3};
 constexpr const char* levelChoices[] = {"OFF", "LOW", "MEDIUM", "HIGH"};
 static_assert(std::size(swingChoices) == std::size(swingSpeeds) && std::size(snapChoices) == std::size(snapTurns) &&
@@ -112,6 +112,7 @@ std::span<const int> steps(Item item) {
     case Item::screenDepth:
         return depthSteps;
     case Item::elasticWeb:
+    case Item::softRelease:
         return levelSteps;
     case Item::nearClip:
         return nearClips;
@@ -168,6 +169,8 @@ float numberOf(Item item, const Values& v) {
         return static_cast<float>(v.screenDepth);
     case Item::elasticWeb:
         return static_cast<float>(v.elasticWeb);
+    case Item::softRelease:
+        return static_cast<float>(v.softRelease);
     case Item::nearClip:
         return static_cast<float>(v.nearClipMm);
     case Item::recordingFov:
@@ -265,6 +268,7 @@ Values sanitized(Values v) {
     v.flipSpeed = std::clamp(v.flipSpeed, 90, 480);
     v.screenDepth = std::clamp(v.screenDepth, 0, 3);
     v.elasticWeb = std::clamp(v.elasticWeb, 0, 3);
+    v.softRelease = std::clamp(v.softRelease, 0, 3);
     v.nearClipMm = std::clamp(v.nearClipMm, nearClips[0], std::end(nearClips)[-1]);
     v.recordingFov = recording_fov::sanitized(v.recordingFov);
     v.uiStyle = std::clamp(v.uiStyle, uiStyles[0], std::end(uiStyles)[-1]);
@@ -281,9 +285,9 @@ Values sanitized(Values v) {
     v.automaticHandThreshold = std::clamp(v.automaticHandThreshold, 50, 300);
     return v;
 }
-const std::array<Row, 54>& rows() {
+const std::array<Row, 55>& rows() {
     // The help fits the game's description column beside the rows.
-    static const std::array<Row, 54> all{{
+    static const std::array<Row, 55> all{{
         {Item::none, "WEBS", nullptr, {}},
         {Item::webStyle, "WEB STYLE",
          "Arcade: webs pass lamp posts, signs and cars, and swings stay above the street.", webStyleChoices},
@@ -304,6 +308,8 @@ const std::array<Row, 54>& rows() {
          "How heavy you are while swinging and after letting go. 100% is real gravity.", weightChoices},
         {Item::elasticWeb, "ELASTIC WEB", "Webs stretch under load for a softer catch. Higher is softer.",
          levelChoices},
+        {Item::softRelease, "SOFT RELEASE",
+         "A web's last pull fades briefly as you let go. Higher lasts longer.", levelChoices},
         {Item::webSlingshot,
          "WEB SLINGSHOT",
          "No auto jump. Draw two fixed webs, hold for vibration, release both to launch.",
@@ -483,6 +489,9 @@ bool choose(Item item, int index, Values& v) {
     case Item::elasticWeb:
         v.elasticWeb = s[index];
         break;
+    case Item::softRelease:
+        v.softRelease = s[index];
+        break;
     case Item::nearClip:
         v.nearClipMm = s[index];
         break;
@@ -568,6 +577,7 @@ constexpr TabOnly tabOnly[] = {
     {"eye_aim", nullptr, &Values::eyeAim},
     {"smart_anchor", &Values::smartAnchor, nullptr},
     {"elastic_web", nullptr, &Values::elasticWeb},
+    {"soft_release", nullptr, &Values::softRelease},
 };
 } // namespace
 std::string tabOnlyText(const Values& v) {

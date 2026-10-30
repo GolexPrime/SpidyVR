@@ -765,7 +765,9 @@ VR settings
   SWINGING ....... the swing speed limit and your weight. ELASTIC WEB (OFF
                    unless you pick LOW, MEDIUM or HIGH): webs stretch
                    under your weight and catch you more softly, softest
-                   on HIGH.
+                   on HIGH. SOFT RELEASE (OFF unless you pick LOW,
+                   MEDIUM or HIGH): a web you let go of keeps pulling
+                   for a moment, fading out (120, 180 or 240 ms).
   COMFORT ........ snap turn and smooth turn.
   HAPTICS ........ controller vibration; BLOW SOUNDS (GAME: your blows
                    sound as the game's own do, its hits on the one you
@@ -841,8 +843,8 @@ VR settings
                    Desktop: its eye tracking forwarding).
   Changes apply at once. The launcher starts your next session with them;
   its options show every one of them but VR VIEW too.
-  NEAR CLIP, RECORDING FOV, UI STYLE, BLOW SOUNDS, HEIGHT, SEATED, EYE AIM, SMART ANCHOR, ELASTIC WEB, the four body
-  haptics switches and the
+  NEAR CLIP, RECORDING FOV, UI STYLE, BLOW SOUNDS, HEIGHT, SEATED, EYE AIM, SMART ANCHOR, ELASTIC WEB, SOFT RELEASE, the
+  four body haptics switches and the
   CONTROLLED FLIPS and EXPERIMENTAL rows below FLIP SPEED Spidy keeps in
   %APPDATA%\Spidy\spidy_vr.ini, beside the launcher's own settings; the
   launcher shows realistic flips' ten rows while it is on, and the body

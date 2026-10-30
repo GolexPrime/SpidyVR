@@ -528,6 +528,15 @@ class Swing {
     void elasticWeb(int level) {
         elasticWeb_ = std::clamp(level, 0, 3);
     }
+    // A loaded web let go keeps pulling for a moment, fading (0 off; 1 to 3
+    // for 120, 180 or 240 ms), so that letting go is no jolt.
+    void softRelease(int level) {
+        softRelease_ = std::clamp(level, 0, 3);
+        if (!softRelease_) {
+            releasePull_ = {};
+            releaseLeft_ = 0;
+        }
+    }
     const SwingConfig& config() const {
         return config_;
     }
@@ -545,6 +554,10 @@ class Swing {
     bool betterClimbing_{};
     bool smartAnchor_{};
     int elasticWeb_{};
+    // SOFT RELEASE: the pull (m/s^2) still to come, and for how long.
+    int softRelease_{};
+    Vec3 releasePull_{};
+    float releaseLeft_{};
     struct HandState {
         // held: grip squeezed, with release hysteresis. A web shoots only on the
         // press that sets it, so a lost web never re-fires while the grip stays held.

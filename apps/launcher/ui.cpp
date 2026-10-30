@@ -1845,6 +1845,8 @@ void App::options(ImVec2 origin, ImVec2 size) {
         });
         option("Elastic web", "Webs stretch under load and catch you more softly; higher is softer.", S(150),
                [&] { tabCombo("##elasticweb", Item::elasticWeb); });
+        option("Soft release", "A web's last pull fades briefly as you let go; higher lasts longer.", S(150),
+               [&] { tabCombo("##softrelease", Item::softRelease); });
         option("Web slingshot", "No auto jump. Draw two fixed webs, hold for vibration, release both to launch.",
                S(42), [&] { tabToggle("##webslingshot", Item::webSlingshot); });
         option("Better climbing", "Take one web in both hands, then pull hand over hand to keep climbing it.",
