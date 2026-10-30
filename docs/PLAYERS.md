@@ -768,6 +768,11 @@ VR settings
                    on HIGH. SOFT RELEASE (OFF unless you pick LOW,
                    MEDIUM or HIGH): a web you let go of keeps pulling
                    for a moment, fading out (120, 180 or 240 ms).
+                   SLINGSHOT SPEED (with WEB SLINGSHOT on): how fast a
+                   full draw launches you. SWING LIMIT, the launch as
+                   before, under the swing speed limit; or 20 to 300 m/s
+                   of its own until you land. The game cannot load the
+                   city as fast as the fastest launches cross it.
                    BETTER CLIMBING (off until you switch it on): take a
                    web in both hands and pull hand over hand to climb
                    it, an open-air web too; standing, a pull down it
@@ -853,7 +858,7 @@ VR settings
   Changes apply at once. The launcher starts your next session with them;
   its options show every one of them but VR VIEW too.
   NEAR CLIP, RECORDING FOV, UI STYLE, BLOW SOUNDS, HEIGHT, SEATED, EYE AIM, SMART ANCHOR, ELASTIC WEB, SOFT RELEASE, SWING
-  ASSIST, the four body haptics switches and the
+  ASSIST, SLINGSHOT SPEED, the four body haptics switches and the
   CONTROLLED FLIPS and EXPERIMENTAL rows below FLIP SPEED Spidy keeps in
   %APPDATA%\Spidy\spidy_vr.ini, beside the launcher's own settings; the
   launcher shows realistic flips' ten rows while it is on, and the body

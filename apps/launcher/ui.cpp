@@ -1852,6 +1852,9 @@ void App::options(ImVec2 origin, ImVec2 size) {
                [&] { tabToggle("##swingassist", Item::swingAssist); });
         option("Web slingshot", "No auto jump. Draw two fixed webs, hold for vibration, release both to launch.",
                S(42), [&] { tabToggle("##webslingshot", Item::webSlingshot); });
+        option("Slingshot speed",
+               "How fast a full draw launches you: under the swing speed limit, or at a speed of its own.",
+               S(150), [&] { tabCombo("##slingshotspeed", Item::slingshotSpeed); });
         option("Better climbing", "Take one web in both hands, then pull hand over hand to keep climbing it.",
                S(42), [&] { tabToggle("##betterclimbing", Item::betterClimbing); });
         option("Snap turn", "How far a flick of the right stick turns you.", S(150), [&] {

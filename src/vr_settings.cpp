@@ -88,6 +88,11 @@ static_assert(std::size(swingChoices) == std::size(swingSpeeds) && std::size(sna
               std::size(flipSpeedChoices) == std::size(flipSpeeds) &&
               std::size(depthChoices) == std::size(depthSteps) && std::size(depthSteps) == std::size(screenDepths));
 static_assert(std::size(levelChoices) == std::size(levelSteps));
+// SLINGSHOT SPEED: 0 keeps the launch under the swing's speed limit.
+constexpr int slingshotSpeeds[] = {0, 20, 40, 50, 65, 100, 150, 200, 300};
+constexpr const char* slingshotSpeedChoices[] = {"SWING LIMIT", "20 M/S",  "40 M/S",  "50 M/S", "65 M/S",
+                                                 "100 M/S",     "150 M/S", "200 M/S", "300 M/S"};
+static_assert(std::size(slingshotSpeedChoices) == std::size(slingshotSpeeds));
 } // namespace
 
 std::span<const int> steps(Item item) {
@@ -114,6 +119,8 @@ std::span<const int> steps(Item item) {
     case Item::elasticWeb:
     case Item::softRelease:
         return levelSteps;
+    case Item::slingshotSpeed:
+        return slingshotSpeeds;
     case Item::nearClip:
         return nearClips;
     case Item::recordingFov:
@@ -171,6 +178,8 @@ float numberOf(Item item, const Values& v) {
         return static_cast<float>(v.elasticWeb);
     case Item::softRelease:
         return static_cast<float>(v.softRelease);
+    case Item::slingshotSpeed:
+        return static_cast<float>(v.slingshotSpeed);
     case Item::nearClip:
         return static_cast<float>(v.nearClipMm);
     case Item::recordingFov:
@@ -271,6 +280,7 @@ Values sanitized(Values v) {
     v.screenDepth = std::clamp(v.screenDepth, 0, 3);
     v.elasticWeb = std::clamp(v.elasticWeb, 0, 3);
     v.softRelease = std::clamp(v.softRelease, 0, 3);
+    v.slingshotSpeed = v.slingshotSpeed <= 0 ? 0 : std::clamp(v.slingshotSpeed, 20, 300);
     v.nearClipMm = std::clamp(v.nearClipMm, nearClips[0], std::end(nearClips)[-1]);
     v.recordingFov = recording_fov::sanitized(v.recordingFov);
     v.uiStyle = std::clamp(v.uiStyle, uiStyles[0], std::end(uiStyles)[-1]);
@@ -287,9 +297,9 @@ Values sanitized(Values v) {
     v.automaticHandThreshold = std::clamp(v.automaticHandThreshold, 50, 300);
     return v;
 }
-const std::array<Row, 56>& rows() {
+const std::array<Row, 57>& rows() {
     // The help fits the game's description column beside the rows.
-    static const std::array<Row, 56> all{{
+    static const std::array<Row, 57> all{{
         {Item::none, "WEBS", nullptr, {}},
         {Item::webStyle, "WEB STYLE",
          "Arcade: webs pass lamp posts, signs and cars, and swings stay above the street.", webStyleChoices},
@@ -318,6 +328,8 @@ const std::array<Row, 56>& rows() {
          "WEB SLINGSHOT",
          "No auto jump. Draw two fixed webs, hold for vibration, release both to launch.",
          {}},
+        {Item::slingshotSpeed, "SLINGSHOT SPEED",
+         "A full draw's launch: under the swing speed limit, or at its own speed.", slingshotSpeedChoices},
         {Item::betterClimbing,
          "BETTER CLIMBING",
          "Take one web in both hands, then pull hand over hand to keep climbing it.",
@@ -496,6 +508,9 @@ bool choose(Item item, int index, Values& v) {
     case Item::softRelease:
         v.softRelease = s[index];
         break;
+    case Item::slingshotSpeed:
+        v.slingshotSpeed = s[index];
+        break;
     case Item::nearClip:
         v.nearClipMm = s[index];
         break;
@@ -583,6 +598,7 @@ constexpr TabOnly tabOnly[] = {
     {"elastic_web", nullptr, &Values::elasticWeb},
     {"soft_release", nullptr, &Values::softRelease},
     {"swing_assist", &Values::swingAssist, nullptr},
+    {"slingshot_speed", nullptr, &Values::slingshotSpeed},
 };
 } // namespace
 std::string tabOnlyText(const Values& v) {

@@ -1319,6 +1319,7 @@ DWORD WINAPI run(void*) {
             s.elasticWeb = static_cast<uint32_t>(values.elasticWeb);
             s.softRelease = static_cast<uint32_t>(values.softRelease);
             s.swingAssist = values.swingAssist;
+            s.slingshotSpeed = static_cast<float>(values.slingshotSpeed);
             sentSwingSettings = s;
             swingSettingsSent = true;
             // A hand-over owns the walls while it lasts; the player's own

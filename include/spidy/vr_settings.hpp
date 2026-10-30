@@ -156,6 +156,10 @@ struct Values {
     // ahead is cut so you do not slam into it; your lane stays yours (the
     // tab's SWING ASSIST; Swing::allowSwingAssist; pull request #42).
     bool swingAssist = false;
+    // How fast WEB SLINGSHOT launches you at full draw, m/s (the tab's
+    // SLINGSHOT SPEED): 0, its launch as before, under the swing's speed
+    // limit; 20 to 300 its own (Swing::setSlingshotSpeed; pull request #45).
+    int slingshotSpeed = 0;
     bool operator==(const Values&) const = default;
 };
 inline constexpr int eyeAimShots = 1, eyeAimZips = 2;
@@ -253,8 +257,9 @@ enum class Item : uint8_t {
     elasticWeb,
     softRelease,
     swingAssist,
+    slingshotSpeed,
 };
-inline constexpr Item lastItem = Item::swingAssist;
+inline constexpr Item lastItem = Item::slingshotSpeed;
 // Where a row shows: in the tab; on the pause menu's first page instead,
 // under RESUME: VR VIEW (the user, October 15: "move the VIEW: GAME SCREEN to
 // the first menu (the one with resume)"); or only in the launcher's options:
@@ -277,7 +282,7 @@ struct Row {
     std::span<const char* const> choices{};
     Place place{};
 };
-const std::array<Row, 56>& rows();
+const std::array<Row, 57>& rows();
 // The most choices a row shows (game_menu's buffers): a row with more would
 // lose its last ones.
 inline constexpr size_t maxChoices = 9;

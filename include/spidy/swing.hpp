@@ -559,6 +559,19 @@ class Swing {
                ((webs_[0].attached && hands_[0].ropeClimbing) ||
                 (webs_[1].attached && hands_[1].ropeClimbing));
     }
+    // SLINGSHOT SPEED: 0, a launch under maxSpeed as before; 20 to 300 m/s,
+    // a full draw's own. Its flight, until the player lands, may go that
+    // fast (speedLimit()), and over 65 m/s with longer native steps.
+    void setSlingshotSpeed(float speed);
+    bool slingshotFlying() const {
+        return slingshotFlight_;
+    }
+    bool boostedFlight() const {
+        return slingshotFlight_ && slingshotSpeed_ > 65;
+    }
+    float speedLimit() const {
+        return slingshotFlight_ ? std::max(config_.maxSpeed, slingshotSpeed_) : config_.maxSpeed;
+    }
     const SwingConfig& config() const {
         return config_;
     }
@@ -585,6 +598,8 @@ class Swing {
     float assistFlight_{};
     void avoidObstacles(float seconds, const Input& in, const WorldQueries& world);
     bool climbTakeoff_{};
+    float slingshotSpeed_{};
+    bool slingshotFlight_{}, slingshotAirborne_{};
     struct HandState {
         // held: grip squeezed, with release hysteresis. A web shoots only on the
         // press that sets it, so a lost web never re-fires while the grip stays held.

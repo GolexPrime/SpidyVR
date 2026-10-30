@@ -750,8 +750,11 @@ void visit(const native_rays::QueryContext& world) {
     // The movement module moves the body farthestStep a step at most; the
     // command's own step may be an eighth longer than this one before that
     // shortens it.
-    const float cap =
-        std::min(config.maxSpeed * (1.f - 1e-6f), .875f * native_movement::farthestStep / motion.dt);
+    // A SLINGSHOT SPEED flight may go faster than maxSpeed, and over 65 m/s
+    // with longer steps (Swing::speedLimit, boostedFlight).
+    const float farthest =
+        solver.boostedFlight() ? native_movement::boostedStep : native_movement::farthestStep;
+    const float cap = std::min(solver.speedLimit() * (1.f - 1e-6f), .875f * farthest / motion.dt);
     const Vec3 average = delta / motion.dt;
     Vec3 requested = limited(average, cap);
     bool overhead{};
@@ -905,6 +908,10 @@ void visit(const native_rays::QueryContext& world) {
     if (drive) {
         native_movement::Command request;
         request.enabled = 1;
+        if (solver.boostedFlight()) {
+            request.version = 2;
+            request.reserved2 = 1;
+        }
         request.serial = ++motionSerial;
         // The command is applied by the next native step, one frame from now,
         // and repeated if an observation is missed. With a 50 ms lease, a frame
@@ -924,7 +931,8 @@ void visit(const native_rays::QueryContext& world) {
         // strike's own in real time, at rest once it has arrived.
         inFlight.issued(request.serial, requested,
                         striking ? limited(flight.velocity, config.maxSpeed)
-                                 : limited(predicted.velocity + requested - average, config.maxSpeed));
+                                 : limited(predicted.velocity + requested - average, solver.speedLimit()),
+                        native_movement::commandDistance(request));
         owned = true;
     } else if (owned) {
         relinquishMotion();
@@ -1065,7 +1073,7 @@ extern "C" __declspec(dllexport) DWORD WINAPI SpidySwingStart(void* input) {
         motion.durationMs = config.durationMs;
         // The swing caps its own requests at config.maxSpeed, which can rise
         // during play (SpidySwingSettings); the module only rejects faster ones.
-        motion.maxSpeed = motionSpeedLimit;
+        motion.maxSpeed = native_movement::maxPlayerSpeed;
         motion.syncAirVelocity = 1;
         if ((result = startMotion(&motion)))
             break;
@@ -1141,7 +1149,7 @@ extern "C" __declspec(dllexport) DWORD WINAPI SpidySwingRetarget(void* input) {
         motion.record = next.record;
         motion.mover = next.mover;
         motion.durationMs = config.durationMs;
-        motion.maxSpeed = motionSpeedLimit;
+        motion.maxSpeed = native_movement::maxPlayerSpeed;
         motion.syncAirVelocity = 1;
         if (!(result = retargetMotion(&motion))) {
             config.record = next.record;
@@ -1171,7 +1179,7 @@ extern "C" __declspec(dllexport) DWORD WINAPI SpidySwingSettings(void* input) {
          header[2] != settingsBytesV6 && header[2] != settingsBytesV7 && header[2] != settingsBytesV8 &&
          header[2] != settingsBytesV9 && header[2] != settingsBytesV10 && header[2] != settingsBytesV11 &&
          header[2] != settingsBytesV12 && header[2] != settingsBytesV13 && header[2] != settingsBytesV14 &&
-         header[2] != sizeof(s)) ||
+         header[2] != settingsBytesV15 && header[2] != sizeof(s)) ||
         !copy(&s, input, header[2]) || !validSettings(s))
         return 2001;
     AcquireSRWLockExclusive(&lifecycle);
@@ -1224,6 +1232,8 @@ extern "C" __declspec(dllexport) DWORD WINAPI SpidySwingSettings(void* input) {
             solver.softRelease(static_cast<int>(s.softRelease));
         if (s.version >= 15)
             solver.allowSwingAssist(s.swingAssist != 0);
+        if (s.version >= 16)
+            solver.setSlingshotSpeed(s.slingshotSpeed);
         // A swing started without the grab (-NoWebGrab) offers it from now on.
         if (s.grab && !game_grab::offering() && driveMotion && sampleDriven) {
             config.grabKinds = game_grab::movableKinds;

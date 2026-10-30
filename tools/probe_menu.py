@@ -165,9 +165,9 @@ def main():
         press('down')
         press('right', wait=.8)
         step('weight_100', dict(weight=100, swing_speed=40.0), changes=7)
-        # Down past ELASTIC WEB, SOFT RELEASE, SWING ASSIST, WEB SLINGSHOT, BETTER CLIMBING and the COMFORT
-        # heading.
-        press('down', 'down', 'down', 'down', 'down', 'down')
+        # Down past ELASTIC WEB, SOFT RELEASE, SWING ASSIST, WEB SLINGSHOT, SLINGSHOT SPEED, BETTER CLIMBING
+        # and the COMFORT heading.
+        press('down', 'down', 'down', 'down', 'down', 'down', 'down')
         press('right', wait=.8)
         step('snap_turn_45', dict(snap_turn=45, weight=100), changes=8)
         press('down')
