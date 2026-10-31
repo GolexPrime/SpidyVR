@@ -1901,6 +1901,10 @@ void App::options(ImVec2 origin, ImVec2 size) {
                "The headset's picture turned by your flip, spin or smooth turn since the game drew it, as it "
                "is for your head: steadier turns. Off: as before, to compare.",
                S(42), [&] { tabToggle("##flipreprojection", Item::flipReprojection); });
+        option("Steady HUD (experimental)",
+               "The HUD shown by the headset itself, at its own rate, instead of drawn into the game's "
+               "picture: it holds still when the game falls behind. Off: as before, to compare.",
+               S(42), [&] { tabToggle("##steadyhud", Item::steadyHud); });
         option("Realistic flips (experimental)",
                "Webs and arm swings spin you in the air, and landing brings you upright. While on, it takes "
                "the place of Flips' turns, and with Flips on too the left stick steers.",

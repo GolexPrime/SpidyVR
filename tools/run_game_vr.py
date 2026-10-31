@@ -1638,12 +1638,12 @@ HUD_CAPTURE_PATHS = ('none', 'texture', 'wrapped', 'target')
 
 def hud_capture_snapshot(game, address):
     """The steadier-HUD probe (include/spidy/hud_capture.hpp): the panel texture's resource, its barriers
-    and copies, and the header of its newest snapshot."""
+    and copies, the header of its newest snapshot, and STEADY HUD's layer (include/spidy/steady_hud.hpp)."""
     for _ in range(8):
-        raw = game.read(address, 152)
-        if len(raw) != 152:
+        raw = game.read(address, 184)
+        if len(raw) != 184:
             return None
-        if struct.unpack_from('<3I', raw) != (0x53484350, 1, 152):
+        if struct.unpack_from('<3I', raw) != (0x53484350, 2, 184):
             raise RuntimeError('HUD capture protocol mismatch')
         sequence = struct.unpack_from('<Q', raw, 16)[0]
         if sequence & 1 or raw[16:24] != game.read(address+16, 8):
@@ -1657,12 +1657,16 @@ def hud_capture_snapshot(game, address):
         skip, refused = struct.unpack_from('<2I', raw, 120)
         snapshots, pixels = struct.unpack_from('<2Q', raw, 128)
         row_pitch, swap = struct.unpack_from('<2I', raw, 144)
+        staged, layer_copies, layer_frames = struct.unpack_from('<3Q', raw, 152)
+        stage_skip = struct.unpack_from('<I', raw, 176)[0]
         return dict(sequence=sequence, path=HUD_CAPTURE_PATHS[path] if path < len(HUD_CAPTURE_PATHS) else path,
                     found=bool(resource), width=width, height=height, format=fmt, mips=mips, flags=flags,
                     samples=samples, barriers=barriers, executed=executed, other_queue=other, odd=odd,
                     mismatched=mismatched, state=state, known=bool(known), presents=presents, copies=copies,
                     skip=HUD_CAPTURE_SKIPS[skip] if skip < len(HUD_CAPTURE_SKIPS) else skip, refused=refused,
-                    snapshots=snapshots, pixels=pixels, row_pitch=row_pitch, swap=bool(swap))
+                    snapshots=snapshots, pixels=pixels, row_pitch=row_pitch, swap=bool(swap), staged=staged,
+                    layer_copies=layer_copies, layer_frames=layer_frames,
+                    stage_skip=HUD_CAPTURE_SKIPS[stage_skip] if stage_skip < len(HUD_CAPTURE_SKIPS) else stage_skip)
     return None
 
 
@@ -2656,7 +2660,9 @@ def session(a, startup):
                     if capture:
                         hud_capture = capture
                         sample['hud_capture'] = {k: capture[k] for k in ('found', 'known', 'copies', 'snapshots',
-                                                                         'skip', 'state')}
+                                                                         'skip', 'state', 'executed', 'staged',
+                                                                         'layer_copies', 'layer_frames',
+                                                                         'stage_skip')}
                         if capture['snapshots'] != hud_shot_count and capture['pixels']:
                             hud_shot_count = capture['snapshots']
                             try:

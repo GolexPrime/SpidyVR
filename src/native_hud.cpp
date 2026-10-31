@@ -386,6 +386,14 @@ bool native_hud::onScreen(uint64_t withinMs) {
     const auto tick = screenTick.load();
     return tick && GetTickCount64() - tick <= withinMs;
 }
+std::atomic<uint64_t> layeredTick{};
+void native_hud::layered() {
+    layeredTick = GetTickCount64();
+}
+bool native_hud::layered(uint64_t withinMs) {
+    const auto tick = layeredTick.load();
+    return tick && GetTickCount64() - tick <= withinMs;
+}
 void native_hud::setSize(int size) {
     hudSize = std::clamp(size, 0, 3);
 }

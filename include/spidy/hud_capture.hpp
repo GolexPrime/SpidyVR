@@ -11,6 +11,7 @@ namespace spidy::hud_capture {
 // through the game's barriers (native_eye_gpu.cpp), and every few seconds,
 // at a Present of the game's frame, it is copied back to memory for the
 // session report (SpidyHudCapture; the report saves it as a picture).
+// STEADY HUD (steady_hud.hpp) copies the same texture with every eye pair.
 
 // How the D3D12 resource was reached from the stream's colour texture (+10).
 enum Path : uint32_t {
@@ -54,7 +55,7 @@ inline uint32_t readableBytes(DXGI_FORMAT format, bool& swap) {
 }
 // SpidyHudCapture: what the probe found and its newest snapshot.
 struct Data {
-    uint32_t magic = 0x53484350, version = 1, bytes = sizeof(Data), path{};
+    uint32_t magic = 0x53484350, version = 2, bytes = sizeof(Data), path{};
     int64_t sequence{};
     // The resource and its description (DXGI format, mips, flags).
     uint64_t resource{};
@@ -74,6 +75,11 @@ struct Data {
     // unchanged until `snapshots` grows.
     uint64_t snapshots{}, pixels{};
     uint32_t rowPitch{}, swap{};
+    // STEADY HUD: the panel copied with the eye pairs for its layer, the
+    // copies into the layer's image, the headset frames that showed the
+    // layer, and why the last pair's copy was skipped (0: it was made).
+    uint64_t staged{}, layerCopies{}, layerFrames{};
+    uint32_t stageSkip{}, reserved{};
 };
-static_assert(sizeof(Data) == 152);
+static_assert(sizeof(Data) == 184);
 } // namespace spidy::hud_capture
