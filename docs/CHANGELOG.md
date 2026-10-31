@@ -3,7 +3,24 @@
 Every build, newest first, with what changed, why, and what was measured.
 Per-check results are in [VALIDATION.md](VALIDATION.md).
 
-**Latest build (October 30): Spidy 0.7.0, the community patch - twelve pull
+**Latest build (October 31, on 0.7.0): the phone drawn seated.** GolexPrime:
+"I'm supposed to reach behind me for my phone, but it doesn't work at all."
+
+- **The cause.** The back pocket was a standing player's: at least 45 cm under
+  the neck. Seated, that is the chair. Session `game-vr-20261031-164612`
+  (SEATED on): 18 squeezes for the phone, 17 missed as too high, the last with
+  the hand 35 cm under the neck and 16 cm behind it; one began and was let go
+  of on the way.
+- **The change.** With SEATED on, the pocket begins 25 cm under the neck
+  (`PocketDraw::pocketAboveSeated`, set each frame from SEATED), beside or
+  behind the hip on the seat; the report counts squeezes from 20 cm under the
+  neck. Standing, nothing changes. Still behind the neck and out to the side:
+  a hand hanging at the side or in front of the hip shoots its web.
+- **Tests.** Core: the seat's pocket draws seated and misses as too high
+  standing, the lower back still too high seated, the side and the front of
+  the hip no pocket.
+
+**Earlier build (October 30): Spidy 0.7.0, the community patch - twelve pull
 requests.** You: "review open prs and fix what needs fixes, merge whats
 done", then "make a 0.7 release from what you merged - call it community
 patch".
