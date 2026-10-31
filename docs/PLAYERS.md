@@ -149,7 +149,8 @@ Swinging
                           where your hand points: along it, past the knuckles
   Squeeze a grip ........ shoot that hand's web; hold to swing
   Release the grip ...... let go
-  Trigger ............... reel in while the web is attached
+  Trigger ............... reel in while the web is attached; the hand ticks
+                          like a winch for each bit of rope taken in
   Pull a hand sharply ... zip toward the web's anchor
   Pull a hand in ........ the web is a rope in your hand: hanging from it,
                           you go where you pull it, as fast as you pull

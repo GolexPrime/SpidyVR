@@ -3,7 +3,23 @@
 Every build, newest first, with what changed, why, and what was measured.
 Per-check results are in [VALIDATION.md](VALIDATION.md).
 
-**Latest build (October 31, on STEADY HUD): the phone drawn seated.** You:
+**Latest build (October 31, on STEADY HUD): the reel felt in the hand.** You:
+"There's no vibration when you reel the web in with the trigger while hanging
+somewhere."
+
+- **Before.** A web vibrated as it took hold and as it let go; a reel was not
+  felt at all.
+- **The change.** While a hand's web reels in, that controller ticks like a
+  winch, once for every 0.75 m of rope taken in (`reel_haptics::Ticks`): 16 m/s
+  of reel is about 21 ticks a second, a slower one fewer, and a reel at the
+  web's shortest is still. The reel's start is a firmer pulse. The swing tells
+  the XR loop which hand reels (`game_swing::WebState::attached` bit 8, from
+  `Swing::reeling(hand)`). HAPTICS scales it as the rest; a web's own pulses
+  (arriving, a grab) go first.
+- **Tests.** Core 748/748: the ticks for the rope taken in, none paid out or at
+  the shortest, a jump of metres no rope, a new reel afresh.
+
+**Earlier build (October 31, on STEADY HUD): the phone drawn seated.** You:
 "I'm supposed to reach behind me for my phone, but it doesn't work at all."
 
 - **The cause.** The back pocket was a standing player's: at least 45 cm under

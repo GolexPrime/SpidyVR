@@ -14,6 +14,7 @@
 #include "spidy/game_pad.hpp"
 #include "spidy/gadget_wheel.hpp"
 #include "spidy/phone.hpp"
+#include "spidy/reel_haptics.hpp"
 #include "spidy/controller_layout.hpp"
 #include "spidy/game_swing.hpp"
 #include "spidy/native_movement.hpp"
@@ -6373,6 +6374,42 @@ int main() {
             check(threw,"an invalid gravity accepted");
         }
         near(s.config().gravity,14.715f);
+    });
+    test("reel haptics: a winch's ticks for the rope taken in, none while it takes none", [] {
+        using reel_haptics::Ticks;
+        Ticks t;
+        check(!t.update(false,20),"not reeling, a pulse");
+        // The reel begins: a firmer pulse.
+        const auto start=t.update(true,20);
+        check(start&&start.strength==Ticks::startStrength,"the reel's start not felt");
+        // 16 m/s at 90 frames a second: a tick every 0.75 m, about 21 a second.
+        int ticks=0;
+        float length=20;
+        for(int f=0;f<90&&length>2;++f){
+            length-=16.f/90;
+            const auto p=t.update(true,length);
+            if(p){
+                ++ticks;
+                check(p.strength==Ticks::tickStrength&&p.seconds==Ticks::tickSeconds,"a tick's strength");
+            }
+        }
+        check(std::abs(ticks-static_cast<int>((20-length)/Ticks::tickMetres))<=1&&ticks>=20,"ticks not one for every 0.75 m");
+        // At its shortest the reel takes no rope: still.
+        bool still=true;
+        for(int f=0;f<90;++f)still&=!t.update(true,length);
+        check(still,"a reel taking no rope ticked");
+        // Paid out (a swing's slack), then wound back: only the rope taken in counts.
+        Ticks out;
+        out.update(true,10);
+        check(!out.update(true,12)&&!out.update(true,11.5f),"rope paid out ticked");
+        check(out.update(true,11.f),"0.75 m wound back did not tick");
+        // A jump of metres (a new web) is no rope taken in; let go, the next reel starts afresh.
+        Ticks jump;
+        jump.update(true,30);
+        check(!jump.update(true,10),"a jump shorter ticked");
+        check(!jump.update(false,10)&&!jump.reeling(),"let go, still reeling");
+        check(jump.update(true,10).strength==Ticks::startStrength,"a new reel did not start afresh");
+        check(!jump.update(true,std::numeric_limits<float>::quiet_NaN())&&!jump.reeling(),"a broken length reeled");
     });
     test("pocket draw: a grip squeezed at a back pocket, brought up in front, opens the phone there", [] {
         const Pose head{{0,1.7f,0},{}};
