@@ -2486,9 +2486,9 @@ DWORD WINAPI run(void*) {
                                 runtime.haptic(i, 1);
                                 zipHands |= 1u << i;
                             }
-                            // Reeling in, the hand ticks like a winch (reel_haptics.hpp).
+                            // Reeling in, the hand ticks like a winch (REEL HAPTICS, reel_haptics.hpp).
                             if (const auto reel = reelTicks[i].update(
-                                    attached && !grabbing && (swingState.webs[i].attached & 8),
+                                    values.reelHaptics && attached && !grabbing && (swingState.webs[i].attached & 8),
                                     swingState.webs[i].length);
                                 reel && displayAt >= pulseUntil[i])
                                 runtime.haptic(i, reel.strength, reel.seconds);
