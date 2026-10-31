@@ -289,6 +289,8 @@ template <class V> auto switchOf(Item item, V& v) -> decltype(&v.aimMarkers) {
         return &v.hapticCombat;
     case Item::hapticMovement:
         return &v.hapticMovement;
+    case Item::reelHaptics:
+        return &v.reelHaptics;
     case Item::seated:
         return &v.seated;
     default:
@@ -330,9 +332,9 @@ Values sanitized(Values v) {
     v.automaticHandThreshold = std::clamp(v.automaticHandThreshold, 50, 300);
     return v;
 }
-const std::array<Row, 62>& rows() {
+const std::array<Row, 63>& rows() {
     // The help fits the game's description column beside the rows.
-    static const std::array<Row, 62> all{{
+    static const std::array<Row, 63> all{{
         {Item::none, "WEBS", nullptr, {}},
         {Item::webStyle, "WEB STYLE",
          "Arcade: webs pass lamp posts, signs and cars, and swings stay above the street.", webStyleChoices},
@@ -383,6 +385,7 @@ const std::array<Row, 62>& rows() {
         {Item::none, "HAPTICS", nullptr, {}},
         {Item::haptics, "CONTROLLER VIBRATION", "How strongly webs, grabs and punches buzz in your hands.",
          hapticChoices},
+        {Item::reelHaptics, "REEL HAPTICS", "Reeling a web in ticks in that hand like a winch.", {}},
         {Item::blowSounds, "BLOW SOUNDS",
          "What your blows sound like: the game's own hits, Spidy's tones, or none.", blowSoundChoices},
         {Item::bodyHaptics, "BODY HAPTICS",
@@ -657,6 +660,7 @@ constexpr TabOnly tabOnly[] = {
     {"rope_steering", &Values::ropeSteering, nullptr},
     {"web_range_m", nullptr, &Values::webRange},
     {"web_speed", nullptr, &Values::webSpeed},
+    {"reel_haptics", &Values::reelHaptics, nullptr},
 };
 } // namespace
 std::string tabOnlyText(const Values& v) {

@@ -16,8 +16,13 @@ somewhere."
   the XR loop which hand reels (`game_swing::WebState::attached` bit 8, from
   `Swing::reeling(hand)`). HAPTICS scales it as the rest; a web's own pulses
   (arriving, a grab) go first.
-- **Tests.** Core 748/748: the ticks for the rope taken in, none paid out or at
-  the shortest, a jump of metres no rope, a new reel afresh.
+- **REEL HAPTICS**, under HAPTICS after CONTROLLER VIBRATION (and the
+  launcher's haptics card, `reel_haptics` in `spidy_vr.ini` and in settings
+  profiles): off by default, so nothing changes for players who leave it.
+- **Tests.** Core 736/736: the ticks for the rope taken in, none paid out or at
+  the shortest, a jump of metres no rope, a new reel afresh; the switch, off by
+  default and kept as `reel_haptics`. Launcher 38/38 (profiles), the Python
+  suites.
 
 **Earlier build (October 30): Spidy 0.7.0, the community patch - twelve pull
 requests.** You: "review open prs and fix what needs fixes, merge whats
