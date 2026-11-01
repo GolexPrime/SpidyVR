@@ -1961,6 +1961,8 @@ void App::options(ImVec2 origin, ImVec2 size) {
         option("Controller vibration", "How strongly webs and punches buzz.", S(150), [&] {
             stepCombo("##haptics", kHaptics, kHapticValues, static_cast<int>(std::size(kHapticValues)), &o.haptics);
         });
+        option("PC media", "The phone's MUSIC plays what the PC plays: Spotify, a browser. Off: the Music folder.",
+               S(42), [&] { tabToggle("##pcmedia", Item::pcMedia); });
         option("Body haptics", "A bHaptics vest, sleeves and visor feel webs, blows, wind and Spider-Sense; the "
                                "bHaptics Player has to be running.",
                S(150), [&] {

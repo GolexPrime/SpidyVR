@@ -97,6 +97,7 @@ inline constexpr ProfileSetting profileSettings[] = {
     launcherOption("smooth_turn", Item::smoothTurn, 0, 360, &SessionOptions::smoothTurn),
     launcherOption("haptics", Item::haptics, 0, 100, &SessionOptions::haptics),
     tabOnly("blow_sounds", Item::blowSounds, 0, 2, &Values::blowSounds),
+    tabOnly("pc_media", Item::pcMedia, &Values::pcMedia),
     launcherOption("body_haptics", Item::bodyHaptics, 0, 100, &SessionOptions::bodyHaptics),
     tabOnly("body_haptics_webs", Item::hapticWebs, &Values::hapticWebs),
     tabOnly("body_haptics_wind", Item::hapticWind, &Values::hapticWind),
