@@ -1971,6 +1971,8 @@ void App::options(ImVec2 origin, ImVec2 size) {
         });
         option("Reel haptics", "Reeling a web in ticks in that hand like a winch.", S(42),
                [&] { tabToggle("##reelhaptics", Item::reelHaptics); });
+        option("Swing haptics", "Swinging on a taut web ticks softly in that hand, faster as you speed up.", S(42),
+               [&] { tabToggle("##swinghaptics", Item::swingHaptics); });
         option("PC media", "The phone's MUSIC plays what the PC plays: Spotify, a browser. Off: the Music folder.",
                S(42), [&] { tabToggle("##pcmedia", Item::pcMedia); });
         option("Body haptics", "A bHaptics vest, sleeves and visor feel webs, blows, wind and Spider-Sense; the "

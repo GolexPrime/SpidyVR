@@ -295,6 +295,8 @@ template <class V> auto switchOf(Item item, V& v) -> decltype(&v.aimMarkers) {
         return &v.hapticMovement;
     case Item::reelHaptics:
         return &v.reelHaptics;
+    case Item::swingHaptics:
+        return &v.swingHaptics;
     case Item::pcMedia:
         return &v.pcMedia;
     case Item::seated:
@@ -342,9 +344,9 @@ Values sanitized(Values v) {
     v.automaticHandThreshold = std::clamp(v.automaticHandThreshold, 50, 300);
     return v;
 }
-const std::array<Row, 68>& rows() {
+const std::array<Row, 69>& rows() {
     // The help fits the game's description column beside the rows.
-    static const std::array<Row, 68> all{{
+    static const std::array<Row, 69> all{{
         {Item::none, "WEBS", nullptr, {}},
         {Item::webStyle, "WEB STYLE",
          "Arcade: webs pass lamp posts, signs and cars, and swings stay above the street.", webStyleChoices},
@@ -396,6 +398,8 @@ const std::array<Row, 68>& rows() {
         {Item::haptics, "CONTROLLER VIBRATION", "How strongly webs, grabs and punches buzz in your hands.",
          hapticChoices},
         {Item::reelHaptics, "REEL HAPTICS", "Reeling a web in ticks in that hand like a winch.", {}},
+        {Item::swingHaptics, "SWING HAPTICS", "Swinging on a taut web ticks softly in that hand, faster as you speed up.",
+         {}},
         {Item::blowSounds, "BLOW SOUNDS",
          "What your blows sound like: the game's own hits, Spidy's tones, or none.", blowSoundChoices},
         {Item::pcMedia, "PC MEDIA", "The phone plays what the PC plays (Spotify, a browser). Off: the Music folder.",
@@ -685,6 +689,7 @@ constexpr TabOnly tabOnly[] = {
     {"flip_reprojection", &Values::flipReprojection, nullptr},
     {"steady_hud", &Values::steadyHud, nullptr},
     {"reel_haptics", &Values::reelHaptics, nullptr},
+    {"swing_haptics", &Values::swingHaptics, nullptr},
     {"pc_media", &Values::pcMedia, nullptr},
 };
 } // namespace
