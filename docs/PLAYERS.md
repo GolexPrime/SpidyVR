@@ -792,13 +792,7 @@ VR settings
                    takes you off the ground, no jump needed. SINGLE HAND
                    YANK STRENGTH (100% unless you pick another): how much
                    speed a fast one-hand web yank adds, from 50 to 300%
-                   of what it adds now; two-hand zips are unchanged.
-                   LANDING JUMP (off until you switch it on): press jump
-                   just before you land (up to 0.2 s) and you bounce off
-                   the ground at the speed you came down with, the way
-                   you were going, with no landing at all; up to 0.2 s
-                   after it works too, once the game's landing lets go.
-                   From 5 m/s along the ground. TWO
+                   of what it adds now; two-hand zips are unchanged. TWO
                    HAND WEB ZIP (off until you switch it on): with both
                    webs on one spot, pull both arms back fast toward it
                    and you launch at it, harder the faster you pull. HAND
@@ -939,7 +933,7 @@ VR settings
   its options show every one of them but VR VIEW too.
   NEAR CLIP, RECORDING FOV, UI STYLE, BLOW SOUNDS, PC MEDIA, HEIGHT, SEATED, EYE AIM,
   SMART ANCHOR, WEB RANGE, WEB SPEED, ELASTIC WEB, SOFT RELEASE, SWING
-  ASSIST, SLINGSHOT SPEED, SINGLE HAND YANK STRENGTH, LANDING JUMP, TWO HAND WEB ZIP, HAND ROPE STEERING, RECORDING
+  ASSIST, SLINGSHOT SPEED, SINGLE HAND YANK STRENGTH, TWO HAND WEB ZIP, HAND ROPE STEERING, RECORDING
   SMOOTHING, REEL HAPTICS, SWING HAPTICS, the four body haptics switches
   and the
   CONTROLLED FLIPS and EXPERIMENTAL rows below FLIP SPEED Spidy keeps in

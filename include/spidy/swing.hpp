@@ -37,14 +37,6 @@ struct SwingConfig {
     float reelSpeed = 8, maxSpeed = 65, airAcceleration = 2, groundAcceleration = 24;
     float yankSpeed = 1.3f, yankDistance = .14f, yankWindow = .25f, zipMultiplier = 3.5f, maxZipImpulse = 12;
     float jumpSpeed = 6, pointLaunchWindow = .25f, zipLandingWindow = 1.2f;
-    // LANDING JUMP (Swing::landingJump): a jump pressed up to
-    // landingJumpEarly before touching down bounces off just above the
-    // ground, before the game lands the body at all (its landing animation
-    // held the jump back, the player, November 2: "it takes ages before the
-    // jump goes off"); one within landingJumpWindow after it leaves the
-    // ground by the game's jump. Either way at the speed the body came down
-    // with, if that was at least landingJumpLeast along the ground.
-    float landingJumpWindow = .2f, landingJumpEarly = .2f, landingJumpLeast = 5;
     // A charged leap from the ground (Input::leap): up at leapUp for the
     // least charge and leapUpFull for a full one (4 and 11.5 m high at real
     // gravity), and along the stick at up to leapForward.
@@ -338,7 +330,6 @@ enum class EventKind {
     WallGrip, // a palm stuck to the wall; one contact pulse in that hand
     Slingshot, // both drawn webs released: strength is the stored charge
     Shoot,     // WEB SPEED: a web shot and flying, which holds nothing yet (Attach when it arrives)
-    LandingJump, // LANDING JUMP: a jump just as the body landed kept its speed along the ground
 };
 struct Event {
     EventKind kind;
@@ -537,15 +528,6 @@ class Swing {
         return body_.grounded && sinceLanding_ <= config_.pointLaunchWindow &&
                sinceZip_ <= config_.zipLandingWindow;
     }
-    // LANDING JUMP: the body landed a moment ago, fast enough along the ground.
-    bool landingJumpReady() const {
-        return landingJump_ && body_.grounded && !wall_.on && sinceLanding_ <= config_.landingJumpWindow &&
-               length(landingVelocity_) >= config_.landingJumpLeast;
-    }
-    // The speed along the ground the body last came down with (LANDING JUMP).
-    Vec3 landingVelocity() const {
-        return landingVelocity_;
-    }
     const Body& body() const {
         return body_;
     }
@@ -645,16 +627,6 @@ class Swing {
     void singleHandYankStrength(float multiplier) {
         singleHandYankStrength_ = std::clamp(multiplier, .5f, 3.f);
     }
-    // LANDING JUMP (off by default): a jump just as the body lands keeps the
-    // speed it came down with along the ground, instead of the ground's stop.
-    void landingJump(bool on) {
-        landingJump_ = on;
-        if (!on)
-            jumpEarly_ = 0;
-    }
-    bool landingJumpEnabled() const {
-        return landingJump_;
-    }
     const std::vector<Event>& events() const {
         return events_;
     }
@@ -690,16 +662,6 @@ class Swing {
     bool twoHandTarget() const;
     int webSpeedMode_{};
     float singleHandYankStrength_ = 1.f;
-    bool landingJump_{};
-    // The body's velocity in its last step in the air, its part along the
-    // ground at the last landing, and how long ago a jump in the air was
-    // pressed (counted down; LANDING JUMP takes it on landing).
-    Vec3 airVelocity_{}, landingVelocity_{};
-    float jumpEarly_{};
-    // The body's centre over the ground it stands on, measured at each
-    // landing (the radius until the first): how near the ground is.
-    float standHeight_{-1};
-    void airLandingJump(const WorldQueries&);
     struct HandState {
         // held: grip squeezed, with release hysteresis. A web shoots only on the
         // press that sets it, so a lost web never re-fires while the grip stays held.

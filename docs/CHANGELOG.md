@@ -3,39 +3,7 @@
 Every build, newest first, with what changed, why, and what was measured.
 Per-check results are in [VALIDATION.md](VALIDATION.md).
 
-**Latest build (November 2): the landing jump.**
-GolexPrime: "every time you land, have the chance to jump ... the forward
-momentum should not be reduced. You land, press A at the right moment, and
-on it goes."
-
-- **Before.** Only a point launch (a jump within 0.25 s of landing from a web
-  zip) kept the speed; any other landing stopped the body on the ground and a
-  jump went straight up from there.
-- **The change.** With LANDING JUMP on, a jump pressed up to 0.2 s before
-  touching down bounces off just above the ground (`Swing::airLandingJump`: a
-  ray down, the ground no more than 0.2 s ahead at that fall, measured from
-  the height the body stood at on its last landing): the game never lands the
-  body, so its landing animation does not hold the jump back (the first
-  headset test, November 2: "with some landings it takes ages before the
-  jump goes off"). A jump up to 0.2 s after touching down (0.3 s in the
-  first test build, "a little too generous") leaves by the game's own jump,
-  as a point launch does, once its landing lets go. Either way at the speed
-  the body came down with along the ground (5 m/s or more), the way it was
-  going, at the jump's usual 6 m/s up (`EventKind::LandingJump`). A point
-  launch after a zip comes first.
-- **LANDING JUMP**, SWINGING after SINGLE HAND YANK STRENGTH (the launcher's
-  Moving card, `landing_jump` in `spidy_vr.ini` and profiles): off by default,
-  so nothing changes for players who leave it. Swing settings version 23;
-  older packets leave it off.
-- **The 64th setting.** The in-game tab's changes not taken yet were a bit
-  each in one 64-bit word, settings 1 to 63; they are a `std::bitset` sized
-  by the settings now (`game_menu.cpp`, and the tab test's own).
-- **Tests.** Core: the speed kept on a landing, a bounce in the air just
-  before it and none from higher up, none after the window, too slow or
-  switched off, the speed limit; the switch and the settings packet. Launcher (profiles),
-  the Python suites.
-
-**Earlier build (November 2): pull request #55 by ImStillDead - SINGLE HAND
+**Latest build (November 2): pull request #55 by ImStillDead - SINGLE HAND
 YANK STRENGTH, how much speed a one-hand web yank adds.**
 
 - **SINGLE HAND YANK STRENGTH** (SWINGING, before TWO HAND WEB ZIP; the
