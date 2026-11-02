@@ -3,33 +3,32 @@
 Every build, newest first, with what changed, why, and what was measured.
 Per-check results are in [VALIDATION.md](VALIDATION.md).
 
-**Latest build (November 2): EYE SHADOWS, what both eyes share of the shadows.**
+**Latest build (November 2): SHARED SHADOWS, off by default.**
 GolexPrime: "often the shadows show differently in the left and the right
 eye, which looks very odd once your head puts them together in 3D", small
-shadows mostly, and some that pop in and out.
+shadows mostly near the edges of the view, and some that pop in and out.
 
-- **Before.** Since October 11 the second eye takes the first one's sun
-  shadow cascades (`submitScene`, `SpidyEyeShadows` 1). Everything else of
-  the scene submit's shadow setup was each eye's own: the light set, which
-  local lights (lamps, signs, lit windows, headlights) get a shadow map, and
-  the part at `+30`. Each eye chose its own lights within the game's budget,
-  so a lamp's shadow could be in one eye only. The bits for sharing them were
-  there (2 and 4) but never switched on, nor seen in a scene with such lights.
-- **EYE SHADOWS** (EXPERIMENTAL after STEADY HUD, the launcher's display card,
-  `eye_shadows` in `spidy_vr.ini`; not in settings profiles, like STEADY HUD):
-  SUN (1, as before, the default), SUN + LAMPS (3), ALL (7) and EACH EYE (0,
-  to compare). It takes effect at the next frame, so it can be switched while
-  you look; `--own-shadows` still makes it EACH EYE.
-- **What it cannot change.** Screen-space effects (ambient occlusion,
-  screen-space reflections) are worked out from each eye's own picture: at
-  the edges, what one eye sees and the other does not makes them differ. The
-  game's Ambient Occlusion setting is what changes those.
+- **Why.** Since October 11 the second eye took the first one's sun shadow
+  cascades (`submitScene`, `SpidyEyeShadows` 1), fitted to the lens covering
+  both eyes. A first headset test build had four steps: the sun's (as
+  before), also the light set (lamps' shadows, bit 2), also the `+30` part
+  (bit 4), and each eye its own (0). Each eye's own fixed both the edges and
+  the popping; the other two made no difference. Likely (not confirmed in
+  the game's code): which objects cast a shadow into the shared cascades is
+  still chosen by the first eye's view alone, so what only the second eye
+  sees at its edge has none.
+- **SHARED SHADOWS** (EXPERIMENTAL after STEADY HUD, the launcher's display
+  card, `shared_shadows` in `spidy_vr.ini`; not in settings profiles, like
+  STEADY HUD): on, the sun's cascades are shared as before; off, the
+  default now, each eye renders its own. That costs the processor what
+  sharing saved (October 11: 79 to 87 frames a second turning where the
+  processor was the limit). It takes effect at the next frame;
+  `--own-shadows` still keeps it off.
 - **The 64th setting.** The in-game tab's changes not taken yet were a bit
   each in one 64-bit word, settings 1 to 63; they are a `std::bitset` sized
   by the settings now (`game_menu.cpp`, and the tab test's own).
-- **Tests.** Core: the row, its choices and their bits, saving and an invalid
-  saved value; launcher: kept out of profiles. Not tried: the headset, and
-  SUN + LAMPS or ALL in a scene with shadow-casting lights.
+- **Tests.** Core: the switch, off by default, saved as `shared_shadows`;
+  launcher: kept out of profiles.
 
 **Earlier build (November 2): pull request #55 by ImStillDead - SINGLE HAND
 YANK STRENGTH, how much speed a one-hand web yank adds.**

@@ -929,14 +929,11 @@ VR settings
                    when the headset shows a picture twice. It lies
                    over everything, your hands too. Needs the HUD on.
                    Off by default, to compare.
-  EYE SHADOWS      what both eyes share of the shadows, so a shadow is
-                   not in one eye only: SUN (the default, as before),
-                   SUN + LAMPS (also lamps' and other lights' shadows,
-                   which each eye picks for itself otherwise), ALL, or
-                   EACH EYE (none, to compare). Applies at the next
-                   frame. Soft shading in corners and at the edges of
-                   your view (the game's Ambient Occlusion) is worked
-                   out from each eye's own picture and can still differ.
+  SHARED SHADOWS   both eyes use the first eye's sun shadows instead of
+                   each rendering its own: easier on the processor, but
+                   shadows near the edges of your view can differ
+                   between the eyes and pop in and out. Off by default
+                   (each eye its own). Applies at the next frame.
   Changes apply at once. The launcher starts your next session with them;
   its options show every one of them but VR VIEW too.
   NEAR CLIP, RECORDING FOV, UI STYLE, BLOW SOUNDS, PC MEDIA, HEIGHT, SEATED, EYE AIM,

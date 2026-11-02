@@ -8733,27 +8733,22 @@ int main() {
             near(actual.velocity.y,1.8f*inert().zipMultiplier,.01f);
         }
     });
-    test("EYE SHADOWS: the sun's by default, then lamps', all or each eye's own, kept as eye_shadows", [] {
+    test("SHARED SHADOWS: a switch after STEADY HUD, off by default, kept as shared_shadows", [] {
         using namespace vr_settings;
         Values v;
         const auto& all = rows();
-        check(all[58].item == Item::steadyHud && all[59].item == Item::eyeShadows &&
-                  std::strcmp(all[59].title, "EYE SHADOWS") == 0 && all[59].choices.size() == 4 &&
-                  std::strcmp(all[59].choices[0], "SUN") == 0 && std::strcmp(all[59].choices[3], "EACH EYE") == 0 &&
-                  all[60].item == Item::realisticFlips,
-              "EYE SHADOWS: a list after STEADY HUD");
-        check(v.eyeShadows == 1 && defaultChoice(Item::eyeShadows) == 0, "not the sun's alone by default");
-        const int bits[] = {1, 3, 7, 0};
-        for (int i : {1, 2, 3, 0})
-            check(choose(Item::eyeShadows, i, v) && v.eyeShadows == bits[i] && choice(Item::eyeShadows, v) == i,
-                  "a choice not its SpidyEyeShadows bits");
-        choose(Item::eyeShadows, 1, v);
-        check(tabOnlyText(v).find("eye_shadows=3\n") != std::string::npos &&
-                  withTabOnly({}, "eye_shadows=3\n").eyeShadows == 3 &&
-                  withTabOnly({}, "eye_shadows=0\n").eyeShadows == 0,
-              "spidy_vr.ini does not keep EYE SHADOWS as eye_shadows");
-        check(withTabOnly({}, "eye_shadows=5\n").eyeShadows == 1 && withTabOnly({}, "eye_shadows=99\n").eyeShadows == 1,
-              "an invalid saved value not the sun's");
+        check(all[58].item == Item::steadyHud && all[59].item == Item::sharedShadows &&
+                  std::strcmp(all[59].title, "SHARED SHADOWS") == 0 && all[59].choices.empty() &&
+                  all[59].place == Place::tab && all[60].item == Item::realisticFlips,
+              "SHARED SHADOWS: a switch after STEADY HUD");
+        check(!v.sharedShadows && defaultChoice(Item::sharedShadows) == 0, "shared shadows on by default");
+        check(choose(Item::sharedShadows, 1, v) && v.sharedShadows && choice(Item::sharedShadows, v) == 1,
+              "the switch did not turn it on");
+        check(tabOnlyText(v).find("shared_shadows=1\n") != std::string::npos &&
+                  withTabOnly({}, "shared_shadows=1\n").sharedShadows &&
+                  !withTabOnly({}, "shared_shadows=0\n").sharedShadows &&
+                  !withTabOnly({}, "eye_shadows=1\n").sharedShadows,
+              "spidy_vr.ini does not keep SHARED SHADOWS as shared_shadows");
     });
     test("native landing keeps a short point launch window and pre-impact direction", [] {
         TestWorld world;
@@ -22168,7 +22163,7 @@ int main() {
                                        "slingshot_speed=0\nrecording_smoothing=0\n"
                                        "two_hand_zip=0\nrope_steering=0\nweb_range_m=100\nweb_speed=0\n"
                                        "flip_reprojection=0\nsteady_hud=0\nreel_haptics=0\nswing_haptics=0\n"
-                                       "pc_media=0\nsingle_hand_yank_percent=100\neye_shadows=1\n",
+                                       "pc_media=0\nsingle_hand_yank_percent=100\nshared_shadows=0\n",
               "the defaults' text");
         Values changed = defaults;
         changed.recordingFov = 140;

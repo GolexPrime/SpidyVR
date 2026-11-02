@@ -203,12 +203,12 @@ struct Values {
     // How much speed a fast one-hand web yank adds, percent (the tab's SINGLE
     // HAND YANK STRENGTH; Swing::singleHandYankStrength): 100 as before.
     int singleHandYankPercent = 100;
-    // What the two eyes share of the shadows (the tab's EYE SHADOWS;
-    // SpidyEyeShadows' bits): 1 the sun's cascades (as since October 11), 3
-    // also the light set (lamps' and other local lights' shadows), 7 also the
-    // scene submit's +30 part, 0 each eye its own. A comparison: one eye
-    // choosing other lights than the other shows as shadows in one eye only.
-    int eyeShadows = 1;
+    // SHARED SHADOWS: the second eye takes the first one's sun shadow
+    // cascades (SpidyEyeShadows 1, as from October 11 to November 2), cheaper
+    // for the processor. Off, each eye renders its own (0): with them shared,
+    // shadows near the edges of the view differed between the eyes and popped
+    // in and out (the player, November 2; each eye's own fixed it).
+    bool sharedShadows = false;
     bool operator==(const Values&) const = default;
 };
 inline constexpr int eyeAimShots = 1, eyeAimZips = 2;
@@ -320,9 +320,9 @@ enum class Item : uint8_t {
     swingHaptics,
     pcMedia,
     singleHandYankStrength,
-    eyeShadows,
+    sharedShadows,
 };
-inline constexpr Item lastItem = Item::eyeShadows;
+inline constexpr Item lastItem = Item::sharedShadows;
 // Where a row shows: in the tab; on the pause menu's first page instead,
 // under RESUME: VR VIEW (the user, October 15: "move the VIEW: GAME SCREEN to
 // the first menu (the one with resume)"); or only in the launcher's options:
