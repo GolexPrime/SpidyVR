@@ -3,7 +3,35 @@
 Every build, newest first, with what changed, why, and what was measured.
 Per-check results are in [VALIDATION.md](VALIDATION.md).
 
-**Latest build (November 2): pull request #55 by ImStillDead - SINGLE HAND
+**Latest build (November 2): EYE SHADOWS, what both eyes share of the shadows.**
+GolexPrime: "often the shadows show differently in the left and the right
+eye, which looks very odd once your head puts them together in 3D", small
+shadows mostly, and some that pop in and out.
+
+- **Before.** Since October 11 the second eye takes the first one's sun
+  shadow cascades (`submitScene`, `SpidyEyeShadows` 1). Everything else of
+  the scene submit's shadow setup was each eye's own: the light set, which
+  local lights (lamps, signs, lit windows, headlights) get a shadow map, and
+  the part at `+30`. Each eye chose its own lights within the game's budget,
+  so a lamp's shadow could be in one eye only. The bits for sharing them were
+  there (2 and 4) but never switched on, nor seen in a scene with such lights.
+- **EYE SHADOWS** (EXPERIMENTAL after STEADY HUD, the launcher's display card,
+  `eye_shadows` in `spidy_vr.ini`; not in settings profiles, like STEADY HUD):
+  SUN (1, as before, the default), SUN + LAMPS (3), ALL (7) and EACH EYE (0,
+  to compare). It takes effect at the next frame, so it can be switched while
+  you look; `--own-shadows` still makes it EACH EYE.
+- **What it cannot change.** Screen-space effects (ambient occlusion,
+  screen-space reflections) are worked out from each eye's own picture: at
+  the edges, what one eye sees and the other does not makes them differ. The
+  game's Ambient Occlusion setting is what changes those.
+- **The 64th setting.** The in-game tab's changes not taken yet were a bit
+  each in one 64-bit word, settings 1 to 63; they are a `std::bitset` sized
+  by the settings now (`game_menu.cpp`, and the tab test's own).
+- **Tests.** Core: the row, its choices and their bits, saving and an invalid
+  saved value; launcher: kept out of profiles. Not tried: the headset, and
+  SUN + LAMPS or ALL in a scene with shadow-casting lights.
+
+**Earlier build (November 2): pull request #55 by ImStillDead - SINGLE HAND
 YANK STRENGTH, how much speed a one-hand web yank adds.**
 
 - **SINGLE HAND YANK STRENGTH** (SWINGING, before TWO HAND WEB ZIP; the

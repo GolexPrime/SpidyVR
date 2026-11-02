@@ -2065,6 +2065,11 @@ void App::options(ImVec2 origin, ImVec2 size) {
                "The HUD shown by the headset itself, at its own rate, instead of drawn into the game's "
                "picture: it holds still when the game falls behind. Off: as before, to compare.",
                S(42), [&] { tabToggle("##steadyhud", Item::steadyHud); });
+        option("Eye shadows (experimental)",
+               "What both eyes share of the shadows. Sun: the sun's (as before). Sun + lamps: also the "
+               "shadows of lamps and other lights, which each eye picks for itself otherwise. All: also the "
+               "rest of the scene's shadow setup. Each eye: none, to compare.",
+               S(150), [&] { tabCombo("##eyeshadows", Item::eyeShadows); });
         option("UI style",
                "Spidy's own marks, gadget wheel and meters: Comic, printed like Spidy's videos, or Tech, like the "
                "game's HUD.",
