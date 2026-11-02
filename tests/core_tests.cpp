@@ -8766,29 +8766,55 @@ int main() {
             in.jump = false;
         }
         {
-            // Pressed a moment before the ground: taken on the landing.
+            // Pressed a moment before the ground: off again in the air, the
+            // game never landing the body.
+            Street street;
+            street.enabled = false;
             Swing s(config);
             s.landingJump(true);
-            Body air{{0, 1, 0}, {10, -5, 0}, false};
-            s.predictNativeStep(.01f, in, world, air);
+            // 1.5 m up (the centre 0.35 m over its feet), falling at 5 m/s:
+            // 0.23 s from the ground, beyond the 0.2 s.
+            Body air{{0, 1.5f, 0}, {10, -5, 0}, false};
             in.jump = true;
-            s.predictNativeStep(.01f, in, world, air);
+            s.predictNativeStep(.01f, in, street, air);
+            bool early{};
+            for (const auto& e : s.events())
+                early |= e.kind == EventKind::LandingJump;
+            check(!early, "a jump 0.23 s from the ground bounced already");
             in.jump = false;
-            s.predictNativeStep(.01f, in, world, air);
-            const auto off = s.predictNativeStep(.01f, in, world, {{0, .35f, 0}, {}, true});
+            // 0.15 s from it: off again, at the speed along the ground.
+            air.position.y = .35f + .75f;
+            const auto off = s.predictNativeStep(.01f, in, street, air);
             bool event{};
             for (const auto& e : s.events())
                 event |= e.kind == EventKind::LandingJump;
-            check(event && off.velocity.x > 9.5f, "a jump just before the landing not taken");
+            check(event && off.velocity.x > 9.5f && off.velocity.y > 5,
+                  "a jump just before the landing not a bounce in the air");
+            check(!s.body().grounded, "the bounce landed the body");
+            // Pressed too early: the press is gone by the time the ground is near.
+            Swing late(config);
+            late.landingJump(true);
+            Body high{{0, 4, 0}, {10, -5, 0}, false};
+            in.jump = true;
+            late.predictNativeStep(.01f, in, street, high);
+            in.jump = false;
+            for (int i = 0; i < 30; ++i)
+                late.predictNativeStep(.01f, in, street, high);
+            high.position.y = .35f + .5f;
+            late.predictNativeStep(.01f, in, street, high);
+            bool bounced{};
+            for (const auto& e : late.events())
+                bounced |= e.kind == EventKind::LandingJump;
+            check(!bounced, "a jump pressed 0.3 s too early still bounced");
         }
         {
             // Too late: an ordinary jump, straight up.
             Swing s(config);
             s.landingJump(true);
             land(s, in, {12, -8, 0});
-            for (int i = 0; i < 40; ++i)
+            for (int i = 0; i < 25; ++i)
                 s.predictNativeStep(.01f, in, world, {{0, .35f, 0}, {}, true});
-            check(!s.landingJumpReady(), "the window open after 0.4 s");
+            check(!s.landingJumpReady(), "the window open after 0.25 s");
             in.jump = true;
             const auto off = s.predictNativeStep(.01f, in, world, {{0, .35f, 0}, {}, true});
             check(std::abs(off.velocity.x) < 1, "a late jump kept the landing's speed");

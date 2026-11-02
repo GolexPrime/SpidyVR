@@ -740,9 +740,10 @@ void visit(const native_rays::QueryContext& world) {
     for (const auto& event : solver.events()) {
         // A charged leap leaves the ground as a point launch does: by the
         // game's own jump, then at the leap's velocity.
-        // A LANDING JUMP leaves it the same way, at the speed it landed with.
+        // A LANDING JUMP after touching down leaves it the same way, at the
+        // speed it landed with; one before it is the swing's own flight on.
         pointLaunched |= event.kind == EventKind::PointLaunch || event.kind == EventKind::Leap ||
-                         event.kind == EventKind::LandingJump;
+                         (event.kind == EventKind::LandingJump && body.grounded);
         slingshotLaunched |= event.kind == EventKind::Slingshot;
         newAttachment |= event.kind == EventKind::Attach;
         zipped |= event.kind == EventKind::Zip;

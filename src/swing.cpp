@@ -848,6 +848,28 @@ float Swing::follow(int i, Vec3 radial) const {
     const float cosHalfAngle = std::sqrt(std::max(0.f, (1 + dot(radial, delta / dist)) / 2));
     return std::min(1.f, cosHalfAngle * 1.4142135f);
 }
+// LANDING JUMP in the air: a jump pressed in the air, with the ground no
+// more than landingJumpEarly ahead at this fall, bounces off now, along the
+// ground at the speed the body has, before the game ever lands it.
+void Swing::airLandingJump(const WorldQueries& world) {
+    if (!landingJump_ || body_.grounded || wall_.on || !finite(body_.velocity) || !finite(body_.position))
+        return;
+    const float falling = -body_.velocity.y;
+    const Vec3 across{body_.velocity.x, 0, body_.velocity.z};
+    if (!(falling > 0) || length(across) < config_.landingJumpLeast)
+        return;
+    const float stand = standHeight_ > 0 ? standHeight_ : config_.radius;
+    const float reach = stand + falling * config_.landingJumpEarly + .05f;
+    const auto ground = world.bodyRaycast(body_.position, {0, -1, 0}, std::min(reach, config_.maxRange));
+    if (!ground || !finite(ground->normal) || normalized(ground->normal).y < .5f)
+        return;
+    const float speed = std::min(length(across), config_.maxSpeed);
+    const Vec3 along = normalized(across) * speed;
+    body_.velocity = {along.x, config_.jumpSpeed, along.z};
+    events_.push_back({EventKind::LandingJump, -1, speed});
+    jumpEarly_ = 0;
+    landingVelocity_ = {};
+}
 void Swing::skimGround(float dt, const WorldQueries& world) {
     const float falling = -body_.velocity.y;
     const float clearance = config_.arcade ? config_.arcadeClearance : config_.groundClearance;
@@ -1479,6 +1501,8 @@ void Swing::step(float dt, const Input& in, const WorldQueries& world, const Wor
         }
         jumpQueued_ = false;
     }
+    if (jumpEarly_ > 0)
+        airLandingJump(world);
     const float wallBefore = wall_.on ? dot(body_.position - wall_.point, wall_.normal) : 0.f;
     const Vec3 before = body_.position;
     if (wall_.on) {
@@ -1673,6 +1697,9 @@ void Swing::step(float dt, const Input& in, const WorldQueries& world, const Wor
     if (body_.grounded && !wasGrounded) {
         sinceLanding_ = 0;
         landingVelocity_ = {airVelocity_.x, 0, airVelocity_.z};
+        if (landingJump_)
+            if (const auto ground = world.bodyRaycast(body_.position, {0, -1, 0}, 3); ground && finite(ground->point))
+                standHeight_ = std::clamp(body_.position.y - ground->point.y, .1f, 2.5f);
     }
 }
 void Swing::update(float seconds, const Input& input, const World& world) {
@@ -1734,6 +1761,9 @@ MotionIntent Swing::predictNativeStep(float seconds, const Input& input, const W
         if (finite(body_.velocity))
             airVelocity_ = body_.velocity;
         landingVelocity_ = {airVelocity_.x, 0, airVelocity_.z};
+        if (landingJump_)
+            if (const auto ground = world.bodyRaycast(actual.position, {0, -1, 0}, 3); ground && finite(ground->point))
+                standHeight_ = std::clamp(actual.position.y - ground->point.y, .1f, 2.5f);
     }
     if (!actual.grounded)
         climbTakeoff_ = false;
