@@ -22,6 +22,7 @@ if it were cut or I let go".
   frame's command takes over again.
 - **Tests.** Core: the clock over a two second hitch, and the held grip
   outliving a 1.5 s hitch but not half a second of frames without input.
+
 **Earlier build (November 2): SHARED SHADOWS, off by default.**
 GolexPrime: "often the shadows show differently in the left and the right
 eye, which looks very odd once your head puts them together in 3D", small
