@@ -3,7 +3,33 @@
 Every build, newest first, with what changed, why, and what was measured.
 Per-check results are in [VALIDATION.md](VALIDATION.md).
 
-**Latest build (November 2): pull request #55 by ImStillDead - SINGLE HAND
+**Latest build (November 2): the landing jump.**
+GolexPrime: "every time you land, have the chance to jump ... the forward
+momentum should not be reduced. You land, press A at the right moment, and
+on it goes."
+
+- **Before.** Only a point launch (a jump within 0.25 s of landing from a web
+  zip) kept the speed; any other landing stopped the body on the ground and a
+  jump went straight up from there.
+- **The change.** With LANDING JUMP on, a jump within 0.3 s of landing, or
+  pressed up to 0.12 s before it, leaves the ground at the speed the body came
+  down with along the ground (5 m/s or more), the way it was going, at the
+  jump's usual 6 m/s up (`Swing::landingJumpReady`, `EventKind::LandingJump`).
+  The game's own jump takes it off the ground, as a point launch's does. A
+  point launch after a zip comes first.
+- **LANDING JUMP**, SWINGING after SINGLE HAND YANK STRENGTH (the launcher's
+  Moving card, `landing_jump` in `spidy_vr.ini` and profiles): off by default,
+  so nothing changes for players who leave it. Swing settings version 23;
+  older packets leave it off.
+- **The 64th setting.** The in-game tab's changes not taken yet were a bit
+  each in one 64-bit word, settings 1 to 63; they are a `std::bitset` sized
+  by the settings now (`game_menu.cpp`, and the tab test's own).
+- **Tests.** Core: the speed kept on a landing, a jump pressed just before
+  it, none after the window, too slow or switched off, a point launch first,
+  native landings; the switch and the settings packet. Launcher (profiles),
+  the Python suites.
+
+**Earlier build (November 2): pull request #55 by ImStillDead - SINGLE HAND
 YANK STRENGTH, how much speed a one-hand web yank adds.**
 
 - **SINGLE HAND YANK STRENGTH** (SWINGING, before TWO HAND WEB ZIP; the

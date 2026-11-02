@@ -305,6 +305,8 @@ template <class V> auto switchOf(Item item, V& v) -> decltype(&v.aimMarkers) {
         return &v.reelHaptics;
     case Item::swingHaptics:
         return &v.swingHaptics;
+    case Item::landingJump:
+        return &v.landingJump;
     case Item::pcMedia:
         return &v.pcMedia;
     case Item::seated:
@@ -353,9 +355,9 @@ Values sanitized(Values v) {
     v.automaticHandThreshold = std::clamp(v.automaticHandThreshold, 50, 300);
     return v;
 }
-const std::array<Row, 70>& rows() {
+const std::array<Row, 71>& rows() {
     // The help fits the game's description column beside the rows.
-    static const std::array<Row, 70> all{{
+    static const std::array<Row, 71> all{{
         {Item::none, "WEBS", nullptr, {}},
         {Item::webStyle, "WEB STYLE",
          "Arcade: webs pass lamp posts, signs and cars, and swings stay above the street.", webStyleChoices},
@@ -399,6 +401,7 @@ const std::array<Row, 70>& rows() {
         {Item::singleHandYankStrength, "SINGLE HAND YANK STRENGTH",
          "How much speed a fast one-hand yank adds. 100% as before; two-hand zips stay.",
          singleHandYankStrengthChoices},
+        {Item::landingJump, "LANDING JUMP", "Jump just as you land to keep your speed instead of stopping.", {}},
         {Item::twoHandZip,
          "TWO HAND WEB ZIP",
          "Both webs on one spot: pull both arms back fast to launch at it.",
@@ -724,6 +727,7 @@ constexpr TabOnly tabOnly[] = {
     {"swing_haptics", &Values::swingHaptics, nullptr},
     {"pc_media", &Values::pcMedia, nullptr},
     {"single_hand_yank_percent", nullptr, &Values::singleHandYankPercent},
+    {"landing_jump", &Values::landingJump, nullptr},
 };
 } // namespace
 std::string tabOnlyText(const Values& v) {

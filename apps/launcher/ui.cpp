@@ -1867,6 +1867,8 @@ void App::options(ImVec2 origin, ImVec2 size) {
         option("Single hand yank strength",
                "How much speed a fast one-hand web yank adds. 100% as before; two-hand zips are unchanged.",
                S(150), [&] { tabCombo("##singlehandyank", Item::singleHandYankStrength); });
+        option("Landing jump", "Jump just as you land to keep your speed instead of stopping.", S(42),
+               [&] { tabToggle("##landingjump", Item::landingJump); });
         option("Two hand web zip", "Both webs on one spot: pull both arms back fast to launch at it.",
                S(42), [&] { tabToggle("##twohandzip", Item::twoHandZip); });
         option("Hand rope steering",

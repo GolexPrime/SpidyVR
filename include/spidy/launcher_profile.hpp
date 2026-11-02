@@ -92,6 +92,7 @@ inline constexpr ProfileSetting profileSettings[] = {
     tabOnly("better_climbing", Item::betterClimbing, &Values::betterClimbing),
     tabOnly("single_hand_yank_percent", Item::singleHandYankStrength, 50, 300,
             &Values::singleHandYankPercent),
+    tabOnly("landing_jump", Item::landingJump, &Values::landingJump),
     tabOnly("two_hand_zip", Item::twoHandZip, &Values::twoHandZip),
     tabOnly("rope_steering", Item::ropeSteering, &Values::ropeSteering),
     retired("wall_run", 1),

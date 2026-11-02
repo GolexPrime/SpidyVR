@@ -1351,6 +1351,7 @@ DWORD WINAPI run(void*) {
             s.webSpeed = static_cast<uint32_t>(values.webSpeed);
             s.halfPunchDamage = values.halfPunchDamage;
             s.singleHandYankPercent = static_cast<uint32_t>(values.singleHandYankPercent);
+            s.landingJump = values.landingJump;
             sentSwingSettings = s;
             swingSettingsSent = true;
             // A hand-over owns the walls while it lasts; the player's own

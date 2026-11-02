@@ -58,6 +58,7 @@ Swing::Swing(SwingConfig c) : config_(c) {
     const float nonnegative[] = {
         c.gravity,          c.reelSpeed,       c.airAcceleration, c.groundAcceleration, c.zipMultiplier,
         c.maxZipImpulse,    c.jumpSpeed,       c.pointLaunchWindow, c.zipLandingWindow, c.obstructionTime,
+        c.landingJumpWindow, c.landingJumpEarly, c.landingJumpLeast,
         c.anchorClearance,  c.wallStep,        c.wallCarry,       c.wallWalkSpeed,   c.wallAcceleration,   c.wallBrake,
         c.wallJumpOut,      c.wallJumpUp,      c.wallJumpPause,   c.wallGrace,          c.crestSeconds,
         c.crestPush,        c.crestHop,        c.strandReach,     c.handSlack,          c.groundClearance,
@@ -761,6 +762,8 @@ void Swing::reset(Body b) {
     sinceZip_ = sinceLanding_ = 100;
     zipSpeed_ = 0;
     zipDirection_ = {};
+    airVelocity_ = landingVelocity_ = {};
+    jumpEarly_ = 0;
     jumpHeld_ = jumpQueued_ = false;
     leapQueued_ = 0;
     leapHeld_ = false;
@@ -959,6 +962,8 @@ void Swing::releaseAll() {
     sinceZip_ = sinceLanding_ = 100;
     zipSpeed_ = 0;
     zipDirection_ = {};
+    airVelocity_ = landingVelocity_ = {};
+    jumpEarly_ = 0;
 }
 void Swing::inputs(float dt, const Input& in, const WorldQueries& world) {
     // TWO HAND WEB ZIP: a tracking gap, a long frame or a turn of the view
@@ -1401,7 +1406,16 @@ void Swing::avoidObstacles(float dt, const Input& in, const WorldQueries& world)
 void Swing::step(float dt, const Input& in, const WorldQueries& world, const World* collision) {
     sinceZip_ += dt;
     sinceLanding_ += dt;
+    jumpEarly_ = std::max(0.f, jumpEarly_ - dt);
     const bool wasGrounded = body_.grounded;
+    if (!body_.grounded && !wall_.on && finite(body_.velocity))
+        airVelocity_ = body_.velocity;
+    // LANDING JUMP: a jump pressed in the air just before the landing is
+    // taken as the landing's own.
+    if (jumpEarly_ > 0 && landingJumpReady()) {
+        jumpQueued_ = true;
+        jumpEarly_ = 0;
+    }
     if (body_.grounded || wall_.on) {
         releasePull_ = {};
         releaseLeft_ = 0;
@@ -1447,8 +1461,21 @@ void Swing::step(float dt, const Input& in, const WorldQueries& world, const Wor
                 body_.velocity.y = config_.jumpSpeed * 1.5f;
                 sinceZip_ = 100;
                 events_.push_back({EventKind::PointLaunch, -1, 1});
+            } else if (landingJumpReady()) {
+                // LANDING JUMP: off again at the speed the body came down
+                // with along the ground, the way it was going, as the
+                // ground's stop never happened.
+                const float speed = std::min(length(landingVelocity_), config_.maxSpeed);
+                const Vec3 along = normalized(landingVelocity_) * speed;
+                body_.velocity = {along.x, config_.jumpSpeed, along.z};
+                events_.push_back({EventKind::LandingJump, -1, speed});
+                landingVelocity_ = {};
+                sinceLanding_ = 100;
             }
             body_.grounded = false;
+        } else if (landingJump_) {
+            // In the air: kept a moment for the landing (landingJumpEarly).
+            jumpEarly_ = config_.landingJumpEarly;
         }
         jumpQueued_ = false;
     }
@@ -1643,8 +1670,10 @@ void Swing::step(float dt, const Input& in, const WorldQueries& world, const Wor
         holdWall(dt, wallBefore, collision);
     for (int i = 0; i < 2; ++i)
         webs_[i].tension = webs_[i].attached ? pull[i] / dt : 0;
-    if (body_.grounded && !wasGrounded)
+    if (body_.grounded && !wasGrounded) {
         sinceLanding_ = 0;
+        landingVelocity_ = {airVelocity_.x, 0, airVelocity_.z};
+    }
 }
 void Swing::update(float seconds, const Input& input, const World& world) {
     events_.clear();
@@ -1698,8 +1727,14 @@ MotionIntent Swing::predictNativeStep(float seconds, const Input& input, const W
     // refused here: the caller let go of a swinging player, whom the game
     // then dropped at its own fall speed (October 10 headset report).
     seconds = std::min(seconds, longestNativeStep);
-    if (actual.grounded && !body_.grounded)
+    if (actual.grounded && !body_.grounded) {
         sinceLanding_ = 0;
+        // The game's landing has already stopped the body: what it came down
+        // with is the prediction's own from the step before (LANDING JUMP).
+        if (finite(body_.velocity))
+            airVelocity_ = body_.velocity;
+        landingVelocity_ = {airVelocity_.x, 0, airVelocity_.z};
+    }
     if (!actual.grounded)
         climbTakeoff_ = false;
     if (slingshotFlight_) {
