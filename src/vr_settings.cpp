@@ -111,6 +111,10 @@ constexpr int singleHandYankStrengths[] = {50, 75, 100, 125, 150, 200, 250, 300}
 constexpr const char* singleHandYankStrengthChoices[] = {"50%",  "75%",  "100%", "125%",
                                                          "150%", "200%", "250%", "300%"};
 static_assert(std::size(singleHandYankStrengthChoices) == std::size(singleHandYankStrengths));
+// EYE SHADOWS: SpidyEyeShadows' bits, the sun's first (as before).
+constexpr int eyeShadowModes[] = {1, 3, 7, 0};
+constexpr const char* eyeShadowChoices[] = {"SUN", "SUN + LAMPS", "ALL", "EACH EYE"};
+static_assert(std::size(eyeShadowChoices) == std::size(eyeShadowModes));
 } // namespace
 
 std::span<const int> steps(Item item) {
@@ -147,6 +151,8 @@ std::span<const int> steps(Item item) {
         return webSpeeds;
     case Item::singleHandYankStrength:
         return singleHandYankStrengths;
+    case Item::eyeShadows:
+        return eyeShadowModes;
     case Item::nearClip:
         return nearClips;
     case Item::recordingFov:
@@ -214,6 +220,8 @@ float numberOf(Item item, const Values& v) {
         return static_cast<float>(v.webSpeed);
     case Item::singleHandYankStrength:
         return static_cast<float>(v.singleHandYankPercent);
+    case Item::eyeShadows:
+        return static_cast<float>(v.eyeShadows);
     case Item::nearClip:
         return static_cast<float>(v.nearClipMm);
     case Item::recordingFov:
@@ -337,6 +345,8 @@ Values sanitized(Values v) {
     v.webRange = std::clamp(v.webRange, 10, 1000);
     v.webSpeed = std::clamp(v.webSpeed, 0, 3);
     v.singleHandYankPercent = std::clamp(v.singleHandYankPercent, 50, 300);
+    if (std::find(std::begin(eyeShadowModes), std::end(eyeShadowModes), v.eyeShadows) == std::end(eyeShadowModes))
+        v.eyeShadows = 1;
     v.nearClipMm = std::clamp(v.nearClipMm, nearClips[0], std::end(nearClips)[-1]);
     v.recordingFov = recording_fov::sanitized(v.recordingFov);
     v.uiStyle = std::clamp(v.uiStyle, uiStyles[0], std::end(uiStyles)[-1]);
@@ -353,9 +363,9 @@ Values sanitized(Values v) {
     v.automaticHandThreshold = std::clamp(v.automaticHandThreshold, 50, 300);
     return v;
 }
-const std::array<Row, 70>& rows() {
+const std::array<Row, 71>& rows() {
     // The help fits the game's description column beside the rows.
-    static const std::array<Row, 70> all{{
+    static const std::array<Row, 71> all{{
         {Item::none, "WEBS", nullptr, {}},
         {Item::webStyle, "WEB STYLE",
          "Arcade: webs pass lamp posts, signs and cars, and swings stay above the street.", webStyleChoices},
@@ -511,6 +521,7 @@ const std::array<Row, 70>& rows() {
          "STEADY HUD",
          "The HUD shown by the headset itself: it holds still when the game falls behind.",
          {}},
+        {Item::eyeShadows, "EYE SHADOWS", "What both eyes share of the shadows: the sun's, also lamps', or all.", eyeShadowChoices},
         {Item::realisticFlips,
          "REALISTIC FLIPS",
          "Momentum rotation from arms and webs. FLIPS also enables left-stick steering.",
@@ -623,6 +634,9 @@ bool choose(Item item, int index, Values& v) {
     case Item::singleHandYankStrength:
         v.singleHandYankPercent = s[index];
         break;
+    case Item::eyeShadows:
+        v.eyeShadows = s[index];
+        break;
     case Item::nearClip:
         v.nearClipMm = s[index];
         break;
@@ -724,6 +738,7 @@ constexpr TabOnly tabOnly[] = {
     {"swing_haptics", &Values::swingHaptics, nullptr},
     {"pc_media", &Values::pcMedia, nullptr},
     {"single_hand_yank_percent", nullptr, &Values::singleHandYankPercent},
+    {"eye_shadows", nullptr, &Values::eyeShadows},
 };
 } // namespace
 std::string tabOnlyText(const Values& v) {

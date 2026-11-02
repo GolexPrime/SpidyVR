@@ -58,6 +58,7 @@
 #include "spidy/tech_marks.hpp"
 #include "spidy/throw_aim.hpp"
 #include "spidy/vd_eyes.hpp"
+#include <bitset>
 #include <algorithm>
 #include <cstring>
 #include <functional>
@@ -8731,6 +8732,28 @@ int main() {
             check(zips==1,"repeated physics samples interrupted or repeated the yank");
             near(actual.velocity.y,1.8f*inert().zipMultiplier,.01f);
         }
+    });
+    test("EYE SHADOWS: the sun's by default, then lamps', all or each eye's own, kept as eye_shadows", [] {
+        using namespace vr_settings;
+        Values v;
+        const auto& all = rows();
+        check(all[58].item == Item::steadyHud && all[59].item == Item::eyeShadows &&
+                  std::strcmp(all[59].title, "EYE SHADOWS") == 0 && all[59].choices.size() == 4 &&
+                  std::strcmp(all[59].choices[0], "SUN") == 0 && std::strcmp(all[59].choices[3], "EACH EYE") == 0 &&
+                  all[60].item == Item::realisticFlips,
+              "EYE SHADOWS: a list after STEADY HUD");
+        check(v.eyeShadows == 1 && defaultChoice(Item::eyeShadows) == 0, "not the sun's alone by default");
+        const int bits[] = {1, 3, 7, 0};
+        for (int i : {1, 2, 3, 0})
+            check(choose(Item::eyeShadows, i, v) && v.eyeShadows == bits[i] && choice(Item::eyeShadows, v) == i,
+                  "a choice not its SpidyEyeShadows bits");
+        choose(Item::eyeShadows, 1, v);
+        check(tabOnlyText(v).find("eye_shadows=3\n") != std::string::npos &&
+                  withTabOnly({}, "eye_shadows=3\n").eyeShadows == 3 &&
+                  withTabOnly({}, "eye_shadows=0\n").eyeShadows == 0,
+              "spidy_vr.ini does not keep EYE SHADOWS as eye_shadows");
+        check(withTabOnly({}, "eye_shadows=5\n").eyeShadows == 1 && withTabOnly({}, "eye_shadows=99\n").eyeShadows == 1,
+              "an invalid saved value not the sun's");
     });
     test("native landing keeps a short point launch window and pre-impact direction", [] {
         TestWorld world;
@@ -21755,9 +21778,8 @@ int main() {
               "the hand gestures missing under better climbing");
         check(all[14].item == Item::webSlingshot, "slingshot missing under SWINGING");
         check(all[16].item == Item::betterClimbing, "better climbing missing under SWINGING");
-        uint64_t seen = 0;
+        std::bitset<static_cast<size_t>(lastItem) + 1> seen;
         unsigned headings = 0;
-        static_assert(static_cast<unsigned>(lastItem) < 64, "more settings than the test's bits");
         for (const auto& row : all) {
             check(row.title && *row.title, "a row without a title");
             for (const char* c = row.title; *c; ++c)
@@ -21767,9 +21789,8 @@ int main() {
                 ++headings;
                 continue;
             }
-            const uint64_t bit = uint64_t{1} << static_cast<unsigned>(row.item);
-            check(!(seen & bit), "a setting twice");
-            seen |= bit;
+            check(!seen.test(static_cast<size_t>(row.item)), "a setting twice");
+            seen.set(static_cast<size_t>(row.item));
             check(row.help && std::strlen(row.help) <= 80, "help missing, or too long for the game's column");
             check(row.choices.size() <= maxChoices, "more choices than the tab shows");
             for (const char* c : row.choices)
@@ -21806,10 +21827,10 @@ int main() {
                                   Item::automaticMinimumSpeed, Item::automaticReleaseFlip, Item::automaticResponse,
                                   Item::automaticHandStrength, Item::automaticFalloff,     Item::automaticHandThreshold,
                                   Item::automaticAirBrake,     Item::automaticCombat};
-        check(all.size() == 59 + std::size(realistic), "the realistic flips' rows are not the last");
+        check(all.size() == 60 + std::size(realistic), "the realistic flips' rows are not the last");
         for (size_t i = 0; i < std::size(realistic); ++i)
-            check(all[59 + i].item == realistic[i], "the realistic flips' rows out of order");
-        check(std::strcmp(all[59].title, "REALISTIC FLIPS") == 0 && all[59].choices.empty(),
+            check(all[60 + i].item == realistic[i], "the realistic flips' rows out of order");
+        check(std::strcmp(all[60].title, "REALISTIC FLIPS") == 0 && all[60].choices.empty(),
               "realistic flips: a switch, first of its rows");
         check(all[50].item == Item::controlledFlips && all[53].item == Item::joystickRunCamera &&
                   all[54].item == Item::wallRunCameraTilt && all[55].item == Item::halfPunchDamage,
@@ -21915,7 +21936,7 @@ int main() {
                                                          : Place::tab),
                   "a row in the wrong place");
         }
-        check(std::count_if(all.begin(), all.end(), [](const Row& r) { return r.place == Place::tab; }) == 65,
+        check(std::count_if(all.begin(), all.end(), [](const Row& r) { return r.place == Place::tab; }) == 66,
               "the tab's own rows");
         check(all[1].item == Item::webStyle && std::strcmp(all[1].title, "WEB STYLE") == 0 &&
                   all[1].choices.size() == 2 && std::strcmp(all[1].choices[0], "REALISTIC") == 0 &&
@@ -21949,8 +21970,7 @@ int main() {
                   std::strcmp(all[45].choices[1], "ON RESUME") == 0,
               "the body's calibration: NO, or ON RESUME");
         // Every setting has a row.
-        constexpr uint64_t everySetting = (~uint64_t{0} >> (63 - static_cast<unsigned>(lastItem))) & ~uint64_t{1};
-        check(seen == everySetting, "a setting missing");
+        check(seen.count() == static_cast<size_t>(lastItem) && !seen.test(0), "a setting missing");
         auto choicesOf = [&](Item item) {
             return std::find_if(all.begin(), all.end(), [&](const Row& r) { return r.item == item; })->choices.size();
         };
@@ -22148,7 +22168,7 @@ int main() {
                                        "slingshot_speed=0\nrecording_smoothing=0\n"
                                        "two_hand_zip=0\nrope_steering=0\nweb_range_m=100\nweb_speed=0\n"
                                        "flip_reprojection=0\nsteady_hud=0\nreel_haptics=0\nswing_haptics=0\n"
-                                       "pc_media=0\nsingle_hand_yank_percent=100\n",
+                                       "pc_media=0\nsingle_hand_yank_percent=100\neye_shadows=1\n",
               "the defaults' text");
         Values changed = defaults;
         changed.recordingFov = 140;
