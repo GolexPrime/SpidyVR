@@ -37,11 +37,14 @@ struct SwingConfig {
     float reelSpeed = 8, maxSpeed = 65, airAcceleration = 2, groundAcceleration = 24;
     float yankSpeed = 1.3f, yankDistance = .14f, yankWindow = .25f, zipMultiplier = 3.5f, maxZipImpulse = 12;
     float jumpSpeed = 6, pointLaunchWindow = .25f, zipLandingWindow = 1.2f;
-    // LANDING JUMP (Swing::landingJump): a jump within landingJumpWindow of
-    // touching down, or pressed up to landingJumpEarly before it, leaves the
-    // ground at the speed the body came down with, if that was at least
-    // landingJumpLeast along the ground.
-    float landingJumpWindow = .3f, landingJumpEarly = .12f, landingJumpLeast = 5;
+    // LANDING JUMP (Swing::landingJump): a jump pressed up to
+    // landingJumpEarly before touching down bounces off just above the
+    // ground, before the game lands the body at all (its landing animation
+    // held the jump back, the player, November 2: "it takes ages before the
+    // jump goes off"); one within landingJumpWindow after it leaves the
+    // ground by the game's jump. Either way at the speed the body came down
+    // with, if that was at least landingJumpLeast along the ground.
+    float landingJumpWindow = .2f, landingJumpEarly = .2f, landingJumpLeast = 5;
     // A charged leap from the ground (Input::leap): up at leapUp for the
     // least charge and leapUpFull for a full one (4 and 11.5 m high at real
     // gravity), and along the stick at up to leapForward.
@@ -693,6 +696,10 @@ class Swing {
     // pressed (counted down; LANDING JUMP takes it on landing).
     Vec3 airVelocity_{}, landingVelocity_{};
     float jumpEarly_{};
+    // The body's centre over the ground it stands on, measured at each
+    // landing (the radius until the first): how near the ground is.
+    float standHeight_{-1};
+    void airLandingJump(const WorldQueries&);
     struct HandState {
         // held: grip squeezed, with release hysteresis. A web shoots only on the
         // press that sets it, so a lost web never re-fires while the grip stays held.

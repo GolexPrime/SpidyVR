@@ -794,10 +794,11 @@ VR settings
                    speed a fast one-hand web yank adds, from 50 to 300%
                    of what it adds now; two-hand zips are unchanged.
                    LANDING JUMP (off until you switch it on): press jump
-                   just as you land (up to 0.3 s after, or a moment
-                   before) and you are off again at the speed you came
-                   down with, the way you were going, instead of the
-                   ground stopping you; from 5 m/s along the ground. TWO
+                   just before you land (up to 0.2 s) and you bounce off
+                   the ground at the speed you came down with, the way
+                   you were going, with no landing at all; up to 0.2 s
+                   after it works too, once the game's landing lets go.
+                   From 5 m/s along the ground. TWO
                    HAND WEB ZIP (off until you switch it on): with both
                    webs on one spot, pull both arms back fast toward it
                    and you launch at it, harder the faster you pull. HAND
