@@ -1,7 +1,7 @@
 #pragma once
 #include <cmath>
 
-// The reel felt in the hand (the user, October 31: "there is no vibration
+// The reel felt in the hand (GolexPrime, October 31: "there is no vibration
 // when you reel the web in with the trigger while hanging somewhere"). While
 // a hand's web reels in, that hand's controller ticks once for every
 // `tickMetres` of rope taken in, like a winch: the faster the reel, the

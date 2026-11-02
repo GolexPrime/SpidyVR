@@ -84,7 +84,10 @@ struct Values {
     // Experimental physical hand pulls, solid palms and crawling body poses.
     bool handClimb = false;
     bool halfPunchDamage = false; // half health damage, unchanged punch reactions
-    bool joystickRunCamera = false; // wall-floor camera transition during joystick runs
+    // The wall-floor camera transition during HAND WALL CLIMBING's joystick
+    // runs (the tab's JOYSTICK WALL RUN CAMERA), as before pull request #38;
+    // off, the left stick drives the momentum wall run's view and gait.
+    bool joystickRunCamera = true;
     bool wallRunCameraTilt = true; // optional horizontal momentum-run camera bank
     // Scenes the game plays on the game screen (cutscenes, finishers) have
     // depth there (the tab's GAME SCREEN 3D): 0 off, the game's flat frame; 1
@@ -197,6 +200,12 @@ struct Values {
     // The phone's MUSIC plays what the PC plays (the tab's PC MEDIA;
     // phone_pc_media.hpp): Spotify, a browser. Off by default: the Music folder.
     bool pcMedia = false;
+    // How much speed a fast one-hand web yank adds, percent (the tab's SINGLE
+    // HAND YANK STRENGTH; Swing::singleHandYankStrength): 100 as before.
+    int singleHandYankPercent = 100;
+    // A jump just as you land keeps your speed (the tab's LANDING JUMP;
+    // Swing::landingJump). Off by default.
+    bool landingJump = false;
     bool operator==(const Values&) const = default;
 };
 inline constexpr int eyeAimShots = 1, eyeAimZips = 2;
@@ -300,15 +309,17 @@ enum class Item : uint8_t {
     ropeSteering,
     webRange,
     webSpeed,
-    flipReprojection,
-    steadyHud,
     joystickRunCamera,
     halfPunchDamage,
+    flipReprojection,
+    steadyHud,
     reelHaptics,
-    pcMedia,
     swingHaptics,
+    pcMedia,
+    singleHandYankStrength,
+    landingJump,
 };
-inline constexpr Item lastItem = Item::swingHaptics;
+inline constexpr Item lastItem = Item::landingJump;
 // Where a row shows: in the tab; on the pause menu's first page instead,
 // under RESUME: VR VIEW (the user, October 15: "move the VIEW: GAME SCREEN to
 // the first menu (the one with resume)"); or only in the launcher's options:
@@ -331,7 +342,7 @@ struct Row {
     std::span<const char* const> choices{};
     Place place{};
 };
-const std::array<Row, 69>& rows();
+const std::array<Row, 71>& rows();
 // The most choices a row shows (game_menu's buffers): a row with more would
 // lose its last ones.
 inline constexpr size_t maxChoices = 9;
@@ -348,10 +359,10 @@ bool choose(Item, int choice, Values&);
 int defaultChoice(Item);
 // The settings no launcher.ini key or XrConfig field carries: NEAR CLIP,
 // RECORDING FOV, UI STYLE, BLOW SOUNDS, HEIGHT, SEATED, WEB SLINGSHOT, BETTER CLIMBING, HAND WALL
-// CLIMBING, EYE AIM, FLIP REPROJECTION, STEADY HUD, the realistic flips' eleven rows and the body haptics' four groups. The game
-// module keeps them as these key=value lines in a file of their own, beside
-// the launcher's settings (game_xr.cpp, tabOnlyPath), and reads them back
-// when VR starts; the launcher's options read and write the same file.
+// CLIMBING, EYE AIM, FLIP REPROJECTION, STEADY HUD, REEL HAPTICS, SWING HAPTICS, the realistic flips'
+// eleven rows and the body haptics' four groups. The game module keeps them as these key=value lines in a
+// file of their own, beside the launcher's settings (game_xr.cpp, tabOnlyPath), and reads them back when
+// VR starts; the launcher's options read and write the same file.
 std::string tabOnlyText(const Values&);
 // The values with what such text holds, sanitized. A line with an unknown
 // key, or whose value is no whole number, is passed over.

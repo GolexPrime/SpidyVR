@@ -234,8 +234,11 @@ void musicScreen(std::vector<Vertex>& v, const Plane& p, const PhoneView& view) 
     }
     const bool litAuto = view.lit == PhoneButton::autoplay;
     p.rounded(v, 0, -.055f, .056f, .01f, .005f, .002f, litAuto ? red : dim);
-    p.text(v, view.pcMedia ? "PC MEDIA" : view.autoplay ? "AUTOPLAY ON" : "AUTOPLAY OFF", 0, -.0569f, .0038f, .046f,
-           white);
+    p.text(v,
+           view.pcMedia    ? "PC MEDIA"
+           : view.autoplay ? "AUTOPLAY ON"
+                           : "AUTOPLAY OFF",
+           0, -.0569f, .0038f, .046f, white);
 }
 // GEAR: each gadget, the equipped one marked red, its charges; the level under them.
 void gearScreen(std::vector<Vertex>& v, const Plane& p, const PhoneView& view) {

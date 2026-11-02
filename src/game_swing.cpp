@@ -740,7 +740,9 @@ void visit(const native_rays::QueryContext& world) {
     for (const auto& event : solver.events()) {
         // A charged leap leaves the ground as a point launch does: by the
         // game's own jump, then at the leap's velocity.
-        pointLaunched |= event.kind == EventKind::PointLaunch || event.kind == EventKind::Leap;
+        // A LANDING JUMP leaves it the same way, at the speed it landed with.
+        pointLaunched |= event.kind == EventKind::PointLaunch || event.kind == EventKind::Leap ||
+                         event.kind == EventKind::LandingJump;
         slingshotLaunched |= event.kind == EventKind::Slingshot;
         newAttachment |= event.kind == EventKind::Attach;
         zipped |= event.kind == EventKind::Zip;
@@ -1197,8 +1199,8 @@ extern "C" __declspec(dllexport) DWORD WINAPI SpidySwingSettings(void* input) {
          header[2] != settingsBytesV9 && header[2] != settingsBytesV10 && header[2] != settingsBytesV11 &&
          header[2] != settingsBytesV12 && header[2] != settingsBytesV13 && header[2] != settingsBytesV14 &&
          header[2] != settingsBytesV15 && header[2] != settingsBytesV16 && header[2] != settingsBytesV17 &&
-         header[2] != settingsBytesV18 && header[2] != settingsBytesV19 &&
-         header[2] != settingsBytesV20 && header[2] != sizeof(s)) ||
+         header[2] != settingsBytesV18 && header[2] != settingsBytesV19 && header[2] != settingsBytesV20 &&
+         header[2] != settingsBytesV21 && header[2] != settingsBytesV22 && header[2] != sizeof(s)) ||
         !copy(&s, input, header[2]) || !validSettings(s))
         return 2001;
     AcquireSRWLockExclusive(&lifecycle);
@@ -1233,6 +1235,8 @@ extern "C" __declspec(dllexport) DWORD WINAPI SpidySwingSettings(void* input) {
         noBlows = s.version >= 6 ? s.noBlows : 0u;
         combatVisuals = s.version < 11 || s.combatVisuals != 0;
         halfPunchDamage = s.version >= 21 && s.halfPunchDamage != 0;
+        solver.singleHandYankStrength((s.version >= 22 ? s.singleHandYankPercent : 100u) / 100.f);
+        solver.landingJump(s.version >= 23 && s.landingJump != 0);
         if (s.version >= 7)
             solver.allowArcade(s.arcade != 0);
         if (s.version >= 8)

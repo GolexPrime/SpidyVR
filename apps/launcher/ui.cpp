@@ -1864,6 +1864,11 @@ void App::options(ImVec2 origin, ImVec2 size) {
                S(150), [&] { tabCombo("##slingshotspeed", Item::slingshotSpeed); });
         option("Better climbing", "Take one web in both hands, then pull hand over hand to keep climbing it.",
                S(42), [&] { tabToggle("##betterclimbing", Item::betterClimbing); });
+        option("Single hand yank strength",
+               "How much speed a fast one-hand web yank adds. 100% as before; two-hand zips are unchanged.",
+               S(150), [&] { tabCombo("##singlehandyank", Item::singleHandYankStrength); });
+        option("Landing jump", "Jump just as you land to keep your speed instead of stopping.", S(42),
+               [&] { tabToggle("##landingjump", Item::landingJump); });
         option("Two hand web zip", "Both webs on one spot: pull both arms back fast to launch at it.",
                S(42), [&] { tabToggle("##twohandzip", Item::twoHandZip); });
         option("Hand rope steering",
@@ -1882,6 +1887,10 @@ void App::options(ImVec2 origin, ImVec2 size) {
                "On a wall with the left stick at rest, squeeze a grip near the wall to hold on and pull to "
                "climb; both grips held roll your view along it.",
                S(42), [&] { tabToggle("##handclimb", Item::handClimb); });
+        option("Joystick wall run camera",
+               "On: a joystick run turns your view onto the wall, as before. Off: the left stick drives the "
+               "momentum wall run's view and gait.",
+               S(42), [&] { tabToggle("##joystickruncamera", Item::joystickRunCamera); });
         option("Wall Run Camera Tilt", "Gently bank with the body on horizontal momentum wall runs.", S(42),
                [&] { tabToggle("##wallruncameratilt", Item::wallRunCameraTilt); });
     });
@@ -1901,10 +1910,6 @@ void App::options(ImVec2 origin, ImVec2 size) {
                "The headset's picture turned by your flip, spin or smooth turn since the game drew it, as it "
                "is for your head: steadier turns. Off: as before, to compare.",
                S(42), [&] { tabToggle("##flipreprojection", Item::flipReprojection); });
-        option("Steady HUD (experimental)",
-               "The HUD shown by the headset itself, at its own rate, instead of drawn into the game's "
-               "picture: it holds still when the game falls behind. Off: as before, to compare.",
-               S(42), [&] { tabToggle("##steadyhud", Item::steadyHud); });
         option("Realistic flips (experimental)",
                "Webs and arm swings spin you in the air, and landing brings you upright. While on, it takes "
                "the place of Flips' turns, and with Flips on too the left stick steers.",
@@ -1971,10 +1976,11 @@ void App::options(ImVec2 origin, ImVec2 size) {
         });
         option("Reel haptics", "Reeling a web in ticks in that hand like a winch.", S(42),
                [&] { tabToggle("##reelhaptics", Item::reelHaptics); });
-        option("Swing haptics", "Swinging on a taut web ticks softly in that hand, faster as you speed up.", S(42),
-               [&] { tabToggle("##swinghaptics", Item::swingHaptics); });
-        option("PC media", "The phone's MUSIC plays what the PC plays: Spotify, a browser. Off: the Music folder.",
-               S(42), [&] { tabToggle("##pcmedia", Item::pcMedia); });
+        option("Swing haptics", "Swinging on a taut web ticks softly in that hand, faster as you speed up.",
+               S(42), [&] { tabToggle("##swinghaptics", Item::swingHaptics); });
+        option("PC media",
+               "The phone's MUSIC plays what the PC plays: Spotify, a browser. Off: the Music folder.", S(42),
+               [&] { tabToggle("##pcmedia", Item::pcMedia); });
         option("Body haptics", "A bHaptics vest, sleeves and visor feel webs, blows, wind and Spider-Sense; the "
                                "bHaptics Player has to be running.",
                S(150), [&] {
@@ -2057,6 +2063,10 @@ void App::options(ImVec2 origin, ImVec2 size) {
             static constexpr int sizes[] = {0, 1, 2, 3};
             stepCombo("##hud", kHudSizes, sizes, 4, &o.hud);
         });
+        option("Steady HUD (experimental)",
+               "The HUD shown by the headset itself, at its own rate, instead of drawn into the game's "
+               "picture: it holds still when the game falls behind. Off: as before, to compare.",
+               S(42), [&] { tabToggle("##steadyhud", Item::steadyHud); });
         option("UI style",
                "Spidy's own marks, gadget wheel and meters: Comic, printed like Spidy's videos, or Tech, like the "
                "game's HUD.",
@@ -2064,6 +2074,10 @@ void App::options(ImVec2 origin, ImVec2 size) {
         option("Combat visuals",
                "Show punch arrows, target rings, hit effects and KO text. Spider-Sense stays on.",
                S(42), [&] { tabToggle("##combatvisuals", Item::combatVisuals); });
+        option(
+            "Half punch damage",
+            "Punches and web strikes deal half their damage; launches, smashes and knockback stay the same.",
+            S(42), [&] { tabToggle("##halfpunchdamage", Item::halfPunchDamage); });
     });
     group(1, "Monitor", [&] {
         option("Small game window", "Saves GPU time while you play in VR.", S(42),

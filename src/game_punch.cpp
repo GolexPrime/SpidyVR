@@ -422,8 +422,7 @@ void land(PunchEvent e, bool byStrike) {
         flow.keep();
     const int count = uncalled ? flow.count() : flow.hit();
     auto d = deliver(e, airborne, count, flow, DeliveryConfig{.halfDamage = fighter.halfPunchDamage},
-                     called ? before.way : CueWay::None, cues.config().damage,
-                     !fighter.combatVisuals);
+                     called ? before.way : CueWay::None, cues.config().damage, !fighter.combatVisuals);
     if (uncalled && (d.fly || d.knockback >= Knockback::Knockdown)) {
         d.kind = BlowKind::Hit;
         d.kinetic = d.fly = false;

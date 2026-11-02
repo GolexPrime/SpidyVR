@@ -789,10 +789,18 @@ VR settings
                    BETTER CLIMBING (off until you switch it on): take a
                    web in both hands and pull hand over hand to climb
                    it, an open-air web too; standing, a pull down it
-                   takes you off the ground, no jump needed. TWO HAND
-                   WEB ZIP (off until you switch it on): with both webs
-                   on one spot, pull both arms back fast toward it and
-                   you launch at it, harder the faster you pull. HAND
+                   takes you off the ground, no jump needed. SINGLE HAND
+                   YANK STRENGTH (100% unless you pick another): how much
+                   speed a fast one-hand web yank adds, from 50 to 300%
+                   of what it adds now; two-hand zips are unchanged.
+                   LANDING JUMP (off until you switch it on): press jump
+                   just as you land (up to 0.3 s after, or a moment
+                   before) and you are off again at the speed you came
+                   down with, the way you were going, instead of the
+                   ground stopping you; from 5 m/s along the ground. TWO
+                   HAND WEB ZIP (off until you switch it on): with both
+                   webs on one spot, pull both arms back fast toward it
+                   and you launch at it, harder the faster you pull. HAND
                    ROPE STEERING (off until you switch it on): hold your
                    web with the free hand too and pull it sideways to
                    turn your swing; it makes you no faster.
@@ -864,14 +872,16 @@ VR settings
                    finisher count. Punch speed, contact and free-hand rules
                    still apply. Sound and vibration still work. Web aim markers and the
                    game's own HUD have their existing separate controls.
-  JOYSTICK WALL RUN CAMERA ... off by default: the left stick supplies wall
-                   velocity while the game sees a neutral movement stick,
-                   so the existing momentum wall-running gait and camera
-                   placement take over. The normal momentum wall clearance
-                   is retained; no new body lean or close-view pose is added.
-                   On restores the old wall-floor camera transition.
-                   WALL RUN CAMERA TILT controls the momentum camera bank.
-  HALF PUNCH DAMAGE ... off by default. On halves VR punch and web-strike
+  JOYSTICK WALL RUN CAMERA ... in EXPERIMENTAL under HAND WALL CLIMBING, on
+                   by default: a joystick run along a wall turns your view
+                   onto the wall, as before. Off: the left stick supplies
+                   wall velocity while the game sees a neutral movement
+                   stick, so the existing momentum wall-running gait and
+                   camera placement take over. The normal momentum wall
+                   clearance is retained; no new body lean or close-view
+                   pose is added. WALL RUN CAMERA TILT controls the
+                   momentum camera bank.
+  HALF PUNCH DAMAGE ... in EXPERIMENTAL, off by default. On halves VR punch and web-strike
                    health damage, including uppercuts, smashes, counters and
                    finishers. Launch and smash velocity, knockback, combo
                    rules and punch recognition do not change. Off restores
@@ -921,15 +931,16 @@ VR settings
   STEADY HUD       shows the HUD in the headset as a layer of its own,
                    which the headset places every frame, instead of
                    drawn by the game into its picture: it holds still
-                   when the headset shows a picture twice, with FLIP
-                   REPROJECTION too. It lies over everything, your hands
-                   too. Needs the HUD on. Off by default, to compare.
+                   when the headset shows a picture twice. It lies
+                   over everything, your hands too. Needs the HUD on.
+                   Off by default, to compare.
   Changes apply at once. The launcher starts your next session with them;
   its options show every one of them but VR VIEW too.
   NEAR CLIP, RECORDING FOV, UI STYLE, BLOW SOUNDS, PC MEDIA, HEIGHT, SEATED, EYE AIM,
   SMART ANCHOR, WEB RANGE, WEB SPEED, ELASTIC WEB, SOFT RELEASE, SWING
-  ASSIST, SLINGSHOT SPEED, TWO HAND WEB ZIP, HAND ROPE STEERING, RECORDING
-  SMOOTHING, the four body haptics switches and the
+  ASSIST, SLINGSHOT SPEED, SINGLE HAND YANK STRENGTH, LANDING JUMP, TWO HAND WEB ZIP, HAND ROPE STEERING, RECORDING
+  SMOOTHING, REEL HAPTICS, SWING HAPTICS, the four body haptics switches
+  and the
   CONTROLLED FLIPS and EXPERIMENTAL rows below FLIP SPEED Spidy keeps in
   %APPDATA%\Spidy\spidy_vr.ini, beside the launcher's own settings; the
   launcher shows realistic flips' ten rows while it is on, and the body

@@ -1350,6 +1350,8 @@ DWORD WINAPI run(void*) {
             s.webRange = static_cast<float>(values.webRange);
             s.webSpeed = static_cast<uint32_t>(values.webSpeed);
             s.halfPunchDamage = values.halfPunchDamage;
+            s.singleHandYankPercent = static_cast<uint32_t>(values.singleHandYankPercent);
+            s.landingJump = values.landingJump;
             sentSwingSettings = s;
             swingSettingsSent = true;
             // A hand-over owns the walls while it lasts; the player's own
@@ -2514,9 +2516,10 @@ DWORD WINAPI run(void*) {
                                 zipHands |= 1u << i;
                             }
                             // Reeling in, the hand ticks like a winch (REEL HAPTICS, reel_haptics.hpp).
-                            if (const auto reel = reelTicks[i].update(
-                                    values.reelHaptics && attached && !grabbing && (swingState.webs[i].attached & 8),
-                                    swingState.webs[i].length);
+                            if (const auto reel =
+                                    reelTicks[i].update(values.reelHaptics && attached && !grabbing &&
+                                                            (swingState.webs[i].attached & 8),
+                                                        swingState.webs[i].length);
                                 reel && displayAt >= pulseUntil[i])
                                 runtime.haptic(i, reel.strength, reel.seconds);
                             // Swinging on it taut, the hand ticks with the body's travel
@@ -4067,9 +4070,13 @@ DWORD WINAPI run(void*) {
                         // A flip's tilt in world axes: the body turns with the player.
                         // Standing on a surface, the body already stands along it:
                         // only a flip turns its planted pose further (none on a wall).
-                        // Both joystick and momentum runs use the travel-driven
-                        // pose, independent of the optional camera transition.
-                        const Quat bodyTilt = motion.bodyTilt(runningPose);
+                        // JOYSTICK WALL RUN CAMERA on (the default): the running body
+                        // follows the wall-standing view about its eyes, residual
+                        // surface rotation too. Off, joystick and momentum runs both
+                        // take the travel-driven pose.
+                        const Quat bodyTilt = runningPose && values.joystickRunCamera
+                                                  ? (motion.viewTilt > .0001f ? motion.swing.tilt : Quat{})
+                                                  : motion.bodyTilt(runningPose);
                         if (const Quat tilt = bodyTilt;
                             tilt.x != 0 || tilt.y != 0 || tilt.z != 0) {
                             const Quat yaw = Quat::yaw(motion.swing.trackingYaw);
@@ -4298,13 +4305,14 @@ DWORD WINAPI run(void*) {
                         // eyes leave it out while it shows (native_hud::layered).
                         uint32_t hudWidth{}, hudHeight{};
                         uint64_t hudCopies{}, hudCopiedMs{};
-                        if (drawn == Presentation::immersive && values.steadyHud && values.hud > 0 && hudPlaced &&
-                            native_gpu::latestHud(hudWidth, hudHeight, hudCopies, hudCopiedMs) &&
+                        if (drawn == Presentation::immersive && values.steadyHud && values.hud > 0 &&
+                            hudPlaced && native_gpu::latestHud(hudWidth, hudHeight, hudCopies, hudCopiedMs) &&
                             steady_hud::fresh(GetTickCount64(), hudCopiedMs, true)) {
                             if (hudCopies != hudLayerCopies) {
-                                hudLayerFilled = runtime.fillHud(hudWidth, hudHeight, [](ID3D12Resource* image) {
-                                    return native_gpu::fillHudLayer(image);
-                                });
+                                hudLayerFilled =
+                                    runtime.fillHud(hudWidth, hudHeight, [](ID3D12Resource* image) {
+                                        return native_gpu::fillHudLayer(image);
+                                    });
                                 hudLayerCopies = hudCopies;
                             }
                             const auto quad =

@@ -9,10 +9,9 @@
 //
 // Drawn into the pair, the panel is part of the picture: when the headset
 // shows a pair again (the game slower than the display), the runtime turns it
-// to the newer head, and with FLIP REPROJECTION also by the player's own turn,
-// and the panel with it; it judders where the world is steadied (the user,
-// October 30: "die Arme, das UI ... haben einen Stutter"). As a layer of its
-// own it is placed every headset frame, where Follow holds it in the room.
+// to the newer head, and the panel with it: it judders (the user, October 30:
+// "die Arme, das UI ... haben einen Stutter"). As a layer of its own it is
+// placed every headset frame, where Follow holds it in the room.
 //
 // The panel's texture (native_hud.cpp) is copied with each new eye pair, on
 // the game's queue, in the state the game's barriers left it in
@@ -37,7 +36,8 @@ inline Quad quad(Vec3 head, const Quat& facing, float halfWidth, float distance,
         !std::isfinite(head.x + head.y + head.z + halfWidth + distance) ||
         !std::isfinite(facing.x + facing.y + facing.z + facing.w))
         return q;
-    const float n = std::sqrt(facing.x * facing.x + facing.y * facing.y + facing.z * facing.z + facing.w * facing.w);
+    const float n =
+        std::sqrt(facing.x * facing.x + facing.y * facing.y + facing.z * facing.z + facing.w * facing.w);
     if (!(n > .5f && n < 2))
         return q;
     const Quat f{facing.x / n, facing.y / n, facing.z / n, facing.w / n};
