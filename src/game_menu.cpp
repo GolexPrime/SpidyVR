@@ -77,15 +77,18 @@ constexpr uintptr_t uiMovie = 0x1d29690;
 constexpr uintptr_t openOptionsName = 0x389f4c0, resetAllHash = 0x6d8ed88;
 // The option types of a setting item and of a section heading (vtables).
 constexpr uintptr_t settingType = 0x3a7d6e8, headingType = 0x3a7d838;
-// The tabs' ids, firstTabId + the tab: the game's run 0-10, and its RESET
-// ALL ignores any above.
-constexpr uint32_t firstTabId = 93;
+// The tab's id: the game's run 0-10, and its RESET ALL ignores any above.
+constexpr uint32_t tabId = 93;
+// The tab shows one of Spidy's pages of settings at a time (vr_settings::tabs(),
+// its cards): its first row, PAGE, picks the card with left or right, and the
+// Settings are built again to show it, as after a RESET ALL.
 using vr_settings::tabCount;
-// The rows' setting numbers: the game's run 0-122.
+// The rows' setting numbers: the game's run 0-122. PAGE's is the one after them.
 constexpr int firstSetting = 0x200;
 constexpr size_t tabBytes = 0x40, itemBytes = 0x88, choiceBytes = 0x50;
 using vr_settings::maxChoices;
 constexpr size_t rowCount = std::tuple_size_v<std::remove_cvref_t<decltype(vr_settings::rows())>>;
+constexpr int cardSetting = firstSetting + static_cast<int>(rowCount);
 
 // A Scaleform GFx::Value as the game lays it out: 16 bytes of 0xff, the
 // object interface (for objects and arrays), the type, the data.
@@ -145,12 +148,18 @@ std::atomic<uint32_t> failure{};
 std::atomic<bool> hooked{}, created{};
 // The tab and its items: 0 not built yet, 1 ready, 2 cannot be built.
 std::atomic<int> built{};
-alignas(16) unsigned char tab[tabCount][tabBytes];
+alignas(16) unsigned char tab[tabBytes];
 alignas(16) unsigned char items[rowCount][itemBytes];
-// The tab's own items (its Place's rows), and the row on the first page.
-// Each tab's items one after another: tab t's from tabFirst[t], tabRows[t] of them.
-alignas(16) unsigned char tabItems[rowCount][itemBytes];
-size_t tabFirst[tabCount]{}, tabRows[tabCount]{};
+// PAGE and its choices, one for each card.
+alignas(16) unsigned char cardItem[itemBytes];
+alignas(16) unsigned char cardChoices[tabCount][choiceBytes];
+// The card shown, and a pick of another one not shown yet.
+std::atomic<uint32_t> card{};
+std::atomic<bool> cardPicked{};
+// The tab's own items: PAGE, then the card's rows of its Place. And the row
+// on the first page.
+alignas(16) unsigned char tabItems[rowCount + 1][itemBytes];
+size_t tabRows{};
 int pageRow = -1;
 std::atomic<uint64_t> pagesBuilt{};
 // The page's own build is this game's (checked at install): without it VR
@@ -168,7 +177,7 @@ struct Text {
     uint32_t hash;
     const char* text;
 };
-std::array<Text, 2 * tabCount + rowCount * 2 + rowCount * maxChoices> texts{};
+std::array<Text, 3 + 2 * tabCount + rowCount * 2 + rowCount * maxChoices> texts{};
 size_t textCount{};
 // Indices into texts, sorted by hash.
 std::array<uint16_t, std::size(texts)> byHash{};
@@ -190,7 +199,8 @@ const Text* addText(const char* tag, const char* text) {
     ++textCount;
     return &t;
 }
-const Text *tabName[tabCount]{}, *tabHeading[tabCount]{};
+// The tab's name, each card's heading over it, PAGE's title, help and choices.
+const Text *tabName{}, *tabHeading[tabCount]{}, *cardTitle{}, *cardHelp{}, *cardNames[tabCount]{};
 const Text *titles[rowCount]{}, *helps[rowCount]{};
 // The first page's button's name, which says what A does (pageTitles).
 Text* pageTitle{};
@@ -199,10 +209,13 @@ void addTexts() {
     if (textCount)
         return;
     char tag[24];
+    tabName = addText("SPIDY_VR_TAB", "SPIDY VR");
+    cardTitle = addText("SPIDY_VR_PAGE", "PAGE");
+    cardHelp = addText("SPIDY_VR_PAGE_HELP", "Spidy's settings in four pages: left or right shows the next one");
     for (size_t t = 0; t < tabCount; ++t) {
-        sprintf_s(tag, "SPIDY_VR_TAB_%zu", t);
-        tabName[t] = addText(tag, vr_settings::tabs()[t].name);
-        sprintf_s(tag, "SPIDY_VR_TAB_%zu_HEAD", t);
+        sprintf_s(tag, "SPIDY_VR_PAGE_%zu", t);
+        cardNames[t] = addText(tag, vr_settings::tabs()[t].name);
+        sprintf_s(tag, "SPIDY_VR_PAGE_%zu_HEAD", t);
         tabHeading[t] = addText(tag, vr_settings::tabs()[t].heading);
     }
     for (size_t r = 0; r < rowCount; ++r) {
@@ -305,26 +318,32 @@ uint32_t buildItems() {
                 put<uint64_t>(c, 0x28, 0);
             }
         }
-        // The tab's rows, and the one for the first page; the launcher's own are in neither.
-        pageRow = -1;
-        size_t made = 0;
+        // PAGE: a list of the cards' names.
+        std::memcpy(cardItem, reinterpret_cast<const void*>(setting), itemBytes);
+        put<uint64_t>(cardItem, 8, static_cast<uint64_t>(cardSetting));
+        putText(cardItem, 0x10, cardTitle);
+        putText(cardItem, 0x20, cardHelp);
+        put<uint64_t>(cardItem, 0x70, reinterpret_cast<uint64_t>(cardChoices));
+        put<uint32_t>(cardItem, 0x78, static_cast<uint32_t>(tabCount));
+        put<uint32_t>(cardItem, 0x7c, static_cast<uint32_t>(tabCount));
         for (size_t t = 0; t < tabCount; ++t) {
-            const auto& span = vr_settings::tabs()[t];
-            tabFirst[t] = made;
-            for (size_t r = span.first; r < span.end && r < rowCount; ++r)
-                if (vr_settings::rows()[r].place == vr_settings::Place::page)
-                    pageRow = static_cast<int>(r);
-                else if (vr_settings::rows()[r].place == vr_settings::Place::tab)
-                    std::memcpy(tabItems[made++], items[r], itemBytes);
-            tabRows[t] = made - tabFirst[t];
-            std::memcpy(tab[t], reinterpret_cast<const void*>(menu), tabBytes);
-            put<uint32_t>(tab[t], 8, firstTabId + static_cast<uint32_t>(t));
-            putText(tab[t], 0x10, tabName[t]);
-            putText(tab[t], 0x20, tabHeading[t]);
-            put<uint64_t>(tab[t], 0x30, reinterpret_cast<uint64_t>(tabItems[tabFirst[t]]));
-            put<uint32_t>(tab[t], 0x38, static_cast<uint32_t>(tabRows[t]));
-            put<uint32_t>(tab[t], 0x3c, static_cast<uint32_t>(tabRows[t]));
+            unsigned char* c = cardChoices[t];
+            std::memcpy(c, reinterpret_cast<const void*>(choiceTemplate), choiceBytes);
+            put<uint64_t>(c, 8, reinterpret_cast<uint64_t>(cardNames[t]->tag));
+            put<uint32_t>(c, 0x10, static_cast<uint32_t>(std::strlen(cardNames[t]->tag)));
+            put<uint32_t>(c, 0x14, cardNames[t]->hash);
+            put<uint64_t>(c, 0x18, 0);
+            put<uint64_t>(c, 0x20, 0);
+            put<uint64_t>(c, 0x28, 0);
         }
+        // The row for the first page; the launcher's own is on neither.
+        pageRow = -1;
+        for (size_t r = 0; r < rowCount; ++r)
+            if (vr_settings::rows()[r].place == vr_settings::Place::page)
+                pageRow = static_cast<int>(r);
+        std::memcpy(tab, reinterpret_cast<const void*>(menu), tabBytes);
+        put<uint32_t>(tab, 8, tabId);
+        putText(tab, 0x10, tabName);
         return 0;
     } __except (EXCEPTION_EXECUTE_HANDLER) {
         return 9501;
@@ -339,11 +358,28 @@ bool ready() {
     }
     return built == 1;
 }
+// The tab's items for the card shown: PAGE, then the card's rows of the tab
+// (VR VIEW is on the first page, and the launcher keeps its own), under the
+// card's heading.
+void fillTab() {
+    const uint32_t shownCard = std::min<uint32_t>(card, static_cast<uint32_t>(tabCount) - 1);
+    std::memcpy(tabItems[0], cardItem, itemBytes);
+    size_t made = 1;
+    const auto& span = vr_settings::tabs()[shownCard];
+    for (size_t r = span.first; r < span.end && r < rowCount; ++r)
+        if (vr_settings::rows()[r].place == vr_settings::Place::tab)
+            std::memcpy(tabItems[made++], items[r], itemBytes);
+    tabRows = made;
+    putText(tab, 0x20, tabHeading[shownCard]);
+    put<uint64_t>(tab, 0x30, reinterpret_cast<uint64_t>(tabItems));
+    put<uint32_t>(tab, 0x38, static_cast<uint32_t>(tabRows));
+    put<uint32_t>(tab, 0x3c, static_cast<uint32_t>(tabRows));
+}
 // The game's main thread is building the SPIDY VR tab (or VR VIEW on the
 // pause menu's first page).
 thread_local bool buildingTab{};
-// Adds Spidy's tabs, each built by the game's own code, to the tabs the
-// pause menu's Settings hand to Flash.
+// Adds the SPIDY VR tab, built by the game's own code with the card shown,
+// to the tabs the pause menu's Settings hand to Flash.
 void addTab(GfxValue& tabs) {
     if (!ready())
         return;
@@ -351,19 +387,16 @@ void addTab(GfxValue& tabs) {
         void* movie = reinterpret_cast<void*(__fastcall*)()>(imageBase + uiMovie)();
         if (!movie)
             return;
-        for (size_t t = 0; t < tabCount; ++t) {
-            if (!tabRows[t])
-                continue;
-            GfxValue value{};
-            std::memset(value.head, 0xff, sizeof(value.head));
-            buildingTab = true;
-            const bool made = reinterpret_cast<bool(__fastcall*)(GfxValue*, void*, const void*)>(imageBase + buildTab)(
-                &value, movie, tab[t]);
-            buildingTab = false;
-            if (made && pushBack(tabs, value))
-                ++tabsBuilt;
-            releaseValue(value);
-        }
+        fillTab();
+        GfxValue value{};
+        std::memset(value.head, 0xff, sizeof(value.head));
+        buildingTab = true;
+        const bool made =
+            reinterpret_cast<bool(__fastcall*)(GfxValue*, void*, const void*)>(imageBase + buildTab)(&value, movie, tab);
+        buildingTab = false;
+        if (made && pushBack(tabs, value))
+            ++tabsBuilt;
+        releaseValue(value);
     } __except (EXCEPTION_EXECUTE_HANDLER) {
         // Not again this session; the game's own tabs go on.
         buildingTab = false;
@@ -474,13 +507,11 @@ void __fastcall callbackHook(void* ui, uint32_t hash, GfxValue* args, uint32_t c
         reinterpret_cast<void(__fastcall*)(void*)>(imageBase + pageRefresh)(ui);
         return;
     }
-    // Y RESET ALL on one of Spidy's tabs: the game's RESET ALL takes only its own tabs.
+    // Y RESET ALL on the SPIDY VR tab: the game's RESET ALL takes only its own tabs.
     if (built == 1 && args && count >= 1 && (args[0].type & typeMask) == intType &&
-        static_cast<uint32_t>(args[0].data) >= firstTabId &&
-        static_cast<uint32_t>(args[0].data) < firstTabId + tabCount &&
-        hash == get<uint32_t>(imageBase + resetAllHash)) {
-        // That tab's own rows: VR VIEW is on the first page, and the launcher keeps its own.
-        const auto& span = vr_settings::tabs()[static_cast<uint32_t>(args[0].data) - firstTabId];
+        static_cast<uint32_t>(args[0].data) == tabId && hash == get<uint32_t>(imageBase + resetAllHash)) {
+        // The rows of the page shown: VR VIEW is on the first page, and the launcher keeps its own.
+        const auto& span = vr_settings::tabs()[std::min<uint32_t>(card, static_cast<uint32_t>(tabCount) - 1)];
         for (size_t r = span.first; r < span.end && r < rowCount; ++r)
             if (vr_settings::rows()[r].place == vr_settings::Place::tab)
                 change(itemOf(static_cast<int>(r)), vr_settings::defaultChoice(itemOf(static_cast<int>(r))));
@@ -489,9 +520,23 @@ void __fastcall callbackHook(void* ui, uint32_t hash, GfxValue* args, uint32_t c
         return;
     }
     originalCallback(ui, hash, args, count);
+    // Another page picked on PAGE (setHook): the Settings built again show it.
+    if (cardPicked.exchange(false)) {
+        __try {
+            reinterpret_cast<void(__fastcall*)(void*)>(imageBase + openOptions)(ui);
+        } __except (EXCEPTION_EXECUTE_HANDLER) {
+            failure = 9505;
+        }
+    }
+}
+// PAGE's setting number.
+bool isCard(int setting) {
+    return setting == cardSetting && built == 1;
 }
 // What the game asks of a setting: its kind (0 a list of choices, 5 a heading).
 int __fastcall typeHook(void* system, int setting) {
+    if (isCard(setting))
+        return 0;
     const int r = rowOf(setting);
     if (r < 0)
         return originalType(system, setting);
@@ -499,6 +544,8 @@ int __fastcall typeHook(void* system, int setting) {
 }
 // Its value: the choice shown.
 float __fastcall valueHook(void* system, int setting) {
+    if (isCard(setting))
+        return static_cast<float>(card.load());
     const int r = rowOf(setting);
     if (r < 0)
         return originalValue(system, setting);
@@ -509,20 +556,35 @@ float __fastcall valueHook(void* system, int setting) {
 }
 // Whether it can be changed now: always.
 bool __fastcall activeHook(void* system, int setting) {
+    if (isCard(setting))
+        return true;
     const int r = rowOf(setting);
     return r < 0 ? originalActive(system, setting) : true;
 }
 // Its default, as a value and as a choice: what X RESET puts back.
+// PAGE's is the page shown: X does not leave it.
 float __fastcall defaultHook(void* system, int setting) {
+    if (isCard(setting))
+        return static_cast<float>(card.load());
     const int r = rowOf(setting);
     return r < 0 ? originalDefault(system, setting) : static_cast<float>(vr_settings::defaultChoice(itemOf(r)));
 }
 int __fastcall defaultChoiceHook(void* system, int setting) {
+    if (isCard(setting))
+        return static_cast<int>(card.load());
     const int r = rowOf(setting);
     return r < 0 ? originalDefaultChoice(system, setting) : vr_settings::defaultChoice(itemOf(r));
 }
 // A change from Flash (left or right on a row), and X RESET.
 void __fastcall setHook(void* system, int setting, float value, bool apply, bool force) {
+    if (isCard(setting)) {
+        if (std::isfinite(value) && value >= 0 && value < static_cast<float>(tabCount)) {
+            const auto picked = static_cast<uint32_t>(std::lround(value));
+            if (picked < tabCount && card.exchange(picked) != picked)
+                cardPicked = true;
+        }
+        return;
+    }
     const int r = rowOf(setting);
     if (r < 0)
         return originalSet(system, setting, value, apply, force);
@@ -530,6 +592,8 @@ void __fastcall setHook(void* system, int setting, float value, bool apply, bool
         change(itemOf(r), static_cast<int>(std::lround(value)));
 }
 void __fastcall resetHook(void* system, int setting, bool apply) {
+    if (isCard(setting))
+        return;
     const int r = rowOf(setting);
     if (r < 0)
         return originalReset(system, setting, apply);

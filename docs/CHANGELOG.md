@@ -3,7 +3,38 @@
 Every build, newest first, with what changed, why, and what was measured.
 Per-check results are in [VALIDATION.md](VALIDATION.md).
 
-**Latest build (November 3): a web held through a stutter of the headset's
+**Latest build (November 3): the in-game settings in four pages by theme,
+in the one SPIDY VR tab.** GolexPrime: "our settings menu is massively
+overloaded, and some groupings make no sense": BLOW SOUNDS and PC MEDIA under
+HAPTICS, COMBAT VISUALS (which changes the combo rules) under DISPLAY, and an
+EXPERIMENTAL section of 18 rows mixing flips, wall climbing, damage, eye aim
+and rendering. Four tabs of their own, tried first, were four more entries
+in the Settings: "we wanted Settings, then Spidy as before, and in it
+several cards".
+
+- **Four pages** in the SPIDY VR tab: SPIDY VR (SCREEN AND HUD, COMFORT,
+  PERFORMANCE AND SMOOTHNESS, BODY, RECORDING), SPIDY WEBS (SHOOTING WEBS,
+  SWINGING, WEB TRICKS), SPIDY MOVES (WALLS, FLIPS, COMBAT), SPIDY FEEL
+  (CONTROLLERS, BHAPTICS, SOUND AND MUSIC). `vr_settings::tabs()` says where
+  each starts in `rows()`. The tab's first row, PAGE (setting 0x200 + the
+  rows' count), picks one with left or right; the Settings are then built
+  again (`openOptions`, as after Y) with that page's rows under its heading.
+  The page shown stays for the session; Y (RESET ALL) resets that page.
+- **Experimental settings** stand with their theme, `(EXP)` after the title;
+  STEADY HUD beside FLIP REPROJECTION.
+- **Every help rewritten:** what a setting is for first, then what it does
+  (SOFT RELEASE: "No jolt when you let go: the web's pull fades out over a
+  moment."), still at most 80 characters.
+- **Not changed:** keys in `spidy_vr.ini`, profiles, defaults, the launcher's
+  own options (its profile preview shows the rows' new titles).
+- **Tests.** Core: the pages one after another, the fourteen sections, the
+  marks; the row checks find rows by setting instead of position. Not tried:
+  the game (PAGE, where the cursor stands after the Settings are built
+  again, Y on a page). The grab buttons still go from tab to tab, not from
+  page to page. `tools/probe_menu.py` still walks the old tab and needs
+  updating.
+
+**Earlier build (November 3): a web held through a stutter of the headset's
 stream stays held.**
 
 - In the player's session of November 3 (11:59) Virtual Desktop held a frame
@@ -17,31 +48,6 @@ stream stays held.**
 - Measured: the session report's stalls (`xr_ms`) set against the swing
   samples' webs; core test "a web button let go as a stream stutter ends
   counts only once it stays let go". Not yet tried in the headset.
-
-**Earlier build (November 3): the in-game settings in four tabs by theme.**
-GolexPrime: "our settings menu is massively overloaded, and some groupings
-make no sense": BLOW SOUNDS and PC MEDIA under HAPTICS, COMBAT VISUALS (which
-changes the combo rules) under DISPLAY, and an EXPERIMENTAL section of 18
-rows mixing flips, wall climbing, damage, eye aim and rendering.
-
-- **Four tabs** after the game's own, each built as the one tab was (the
-  game's tab code, from a copy of its GAME tab; ids 93 to 96, above the
-  game's 0-10): SPIDY VR (SCREEN AND HUD, COMFORT, PERFORMANCE AND
-  SMOOTHNESS, BODY, RECORDING), SPIDY WEBS (SHOOTING WEBS, SWINGING, WEB
-  TRICKS), SPIDY MOVES (WALLS, FLIPS, COMBAT), SPIDY FEEL (CONTROLLERS,
-  BHAPTICS, SOUND AND MUSIC). `vr_settings::tabs()` says where each starts in
-  `rows()`; Y (RESET ALL) resets the tab it is pressed on.
-- **Experimental settings** stand with their theme, `(EXP)` after the title;
-  STEADY HUD beside FLIP REPROJECTION.
-- **Every help rewritten:** what a setting is for first, then what it does
-  (SOFT RELEASE: "No jolt when you let go: the web's pull fades out over a
-  moment."), still at most 80 characters.
-- **Not changed:** keys in `spidy_vr.ini`, profiles, defaults, the launcher's
-  own options (its profile preview shows the rows' new titles).
-- **Tests.** Core: the tabs one after another, the fourteen sections, the
-  marks; the row checks find rows by setting instead of position. Not tried:
-  the game (the tab bar with four more tabs, their navigation, Y on each).
-  `tools/probe_menu.py` still walks the one tab and needs updating.
 
 **Earlier build (November 2): a load hitch no longer lets go of the webs.**
 GolexPrime: "with load stutters while swinging I very often lose the web, as
