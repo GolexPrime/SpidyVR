@@ -756,11 +756,23 @@ VR (or "HUD" in the launcher's options) makes it SMALL, MEDIUM or LARGE, or
 switches it OFF.
 
 VR settings
-  They are a tab of the game's own Settings: pause with the menu button,
-  choose Settings, then SPIDY VR, the last tab (Up from GAME gets there in
-  one press). It works like the game's other tabs: the left stick moves and
-  changes the selected setting, X resets it, Y resets the whole tab, B goes
-  back. Its sections:
+  They are four tabs of the game's own Settings, after its own: pause with
+  the menu button, choose Settings, then go Up from GAME to SPIDY FEEL, the
+  last, and on to the others. They work like the game's other tabs: the
+  left stick moves and changes the selected setting, X resets it, Y resets
+  that whole tab, B goes back.
+  SPIDY VR ...... the headset and the picture: SCREEN AND HUD (VR VIEW is on
+                  the pause menu's first page), COMFORT (snap and smooth
+                  turn, NEAR CLIP), PERFORMANCE AND SMOOTHNESS (FLIP
+                  REPROJECTION, STEADY HUD), BODY, RECORDING.
+  SPIDY WEBS .... SHOOTING WEBS (EYE AIM too), SWINGING, WEB TRICKS (the
+                  yank, the two hand zip, the slingshot, better climbing).
+  SPIDY MOVES ... WALLS, FLIPS (realistic flips and their rows), COMBAT
+                  (COMBAT VISUALS, HALF PUNCH DAMAGE, FLIPS IN COMBAT).
+  SPIDY FEEL .... CONTROLLERS (vibration, reel and swing haptics),
+                  BHAPTICS, SOUND AND MUSIC (BLOW SOUNDS, PC MEDIA).
+  An experimental setting has (EXP) after its name. Each setting's help
+  says first what it is for. What each one does, by its earlier sections:
   WEBS ........... WEB STYLE (REALISTIC or ARCADE, below); the WEB BUTTON
                    (GRIP or TRIGGER: the one that shoots and holds a web;
                    the other reels in and shoots web balls); AIM MARKERS;
