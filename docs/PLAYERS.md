@@ -756,11 +756,12 @@ VR (or "HUD" in the launcher's options) makes it SMALL, MEDIUM or LARGE, or
 switches it OFF.
 
 VR settings
-  They are four tabs of the game's own Settings, after its own: pause with
-  the menu button, choose Settings, then go Up from GAME to SPIDY FEEL, the
-  last, and on to the others. They work like the game's other tabs: the
-  left stick moves and changes the selected setting, X resets it, Y resets
-  that whole tab, B goes back.
+  They are the SPIDY VR tab of the game's own Settings, after its own: pause
+  with the menu button, choose Settings, then go Up from GAME to SPIDY VR.
+  Its first row, PAGE, shows one of four pages: left or right on it goes to
+  the next. The rest works like the game's other tabs: the left stick moves
+  and changes the selected setting, X resets it, Y resets the whole page
+  shown, B goes back.
   SPIDY VR ...... the headset and the picture: SCREEN AND HUD (VR VIEW is on
                   the pause menu's first page), COMFORT (snap and smooth
                   turn, NEAR CLIP), PERFORMANCE AND SMOOTHNESS (FLIP
