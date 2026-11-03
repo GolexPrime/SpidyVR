@@ -237,6 +237,15 @@ constexpr float crawlLook = .2f;
 // (GameTrackingRig::update); a floor that moves under a player the view has
 // turned onto it follows him in surfaceGlideSeconds (63%).
 constexpr float blipSeconds = .5f, surfaceGlideSeconds = .05f;
+// A stutter of the headset's stream - Virtual Desktop holding a frame for a
+// tenth of a second - let go of a held web as it ended: in the player's
+// session of November 3 at 11:59, 5 of its 13 such stalls in play dropped a
+// web within 0.15 s, the game's own steps and the hands' tracking unbroken
+// ("I just lost the web a few times"). After a frame that long (or a gap of
+// them shorter than a long break), a hand's web button let go counts once it
+// has stayed let go for stutterGripSeconds; a long frame is one over
+// stutterFrameSeconds.
+constexpr float stutterGripSeconds = .15f, stutterFrameSeconds = .05f;
 // A surface: the actor's up more than 45 degrees from the world's; standing
 // again within 35 degrees.
 constexpr float surfaceEnterCos = .7071068f, surfaceLeaveCos = .819152f;
@@ -445,6 +454,11 @@ class GameTrackingRig {
     Pose lastHead_{};
     Vec3 lastFeet_{}, standOff_{}, lastGameForward_{0, 0, -1};
     std::int64_t lastTime_{};
+    // Each hand's web button at the last frame of play, and until when (a
+    // display time) a let-go of it after a stutter is not believed yet
+    // (stutterGripSeconds).
+    float lastWeb_[2]{};
+    std::int64_t webGraceUntil_{};
     bool initialized_{}, wasActive_{}, turnHeld_{}, pendingRecenter_{}, onSurface_{}, flips_{};
     bool controlledFlips_{};
     // The trigger webs, and the web button changed since the last frame of play.

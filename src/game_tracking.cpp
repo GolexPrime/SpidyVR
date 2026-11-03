@@ -800,6 +800,28 @@ GameMotionFrame GameTrackingRig::update(const XrFrame& f, Vec3 feet, Vec3 gameFo
     out.predictedDisplayTime = f.predictedDisplayTime;
     out.anchor = feet;
     out.swing = trackedSwingInput(f, placed, triggerWebs_);
+    // Through a stutter a held web button stays held for a moment
+    // (stutterGripSeconds): a let-go only the stall made is no let-go.
+    if (out.releaseWebs) {
+        lastWeb_[0] = lastWeb_[1] = 0;
+        webGraceUntil_ = 0;
+    } else {
+        if ((resumed && lastTime_) || !(f.seconds <= stutterFrameSeconds))
+            webGraceUntil_ =
+                f.predictedDisplayTime + static_cast<std::int64_t>(stutterGripSeconds * 1'000'000'000.f);
+        const bool grace = f.predictedDisplayTime < webGraceUntil_;
+        for (unsigned i = 0; i < 2; ++i) {
+            auto& hand = out.swing.hands[i];
+            if (!hand.tracked) {
+                lastWeb_[i] = 0;
+                continue;
+            }
+            if (grace && lastWeb_[i] > .35f && hand.grip < lastWeb_[i])
+                hand.grip = lastWeb_[i];
+            else
+                lastWeb_[i] = hand.grip;
+        }
+    }
     const bool holdingGrip = (handValid(f.hands[0]) && f.hands[0].squeeze > .35f) ||
                              (handValid(f.hands[1]) && f.hands[1].squeeze > .35f);
     const bool physicalClimb = pressing && !walks && holdingGrip;
