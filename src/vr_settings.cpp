@@ -313,8 +313,6 @@ template <class V> auto switchOf(Item item, V& v) -> decltype(&v.aimMarkers) {
         return &v.flipReprojection;
     case Item::steadyHud:
         return &v.steadyHud;
-    case Item::sharedShadows:
-        return &v.sharedShadows;
     default:
         return nullptr;
     }
@@ -355,9 +353,9 @@ Values sanitized(Values v) {
     v.automaticHandThreshold = std::clamp(v.automaticHandThreshold, 50, 300);
     return v;
 }
-const std::array<Row, 71>& rows() {
+const std::array<Row, 70>& rows() {
     // The help fits the game's description column beside the rows.
-    static const std::array<Row, 71> all{{
+    static const std::array<Row, 70> all{{
         {Item::none, "WEBS", nullptr, {}},
         {Item::webStyle, "WEB STYLE",
          "Arcade: webs pass lamp posts, signs and cars, and swings stay above the street.", webStyleChoices},
@@ -513,7 +511,6 @@ const std::array<Row, 71>& rows() {
          "STEADY HUD",
          "The HUD shown by the headset itself: it holds still when the game falls behind.",
          {}},
-        {Item::sharedShadows, "SHARED SHADOWS", "Both eyes use one eye's sun shadows: faster, but they can differ at the edges.", {}},
         {Item::realisticFlips,
          "REALISTIC FLIPS",
          "Momentum rotation from arms and webs. FLIPS also enables left-stick steering.",
@@ -727,7 +724,6 @@ constexpr TabOnly tabOnly[] = {
     {"swing_haptics", &Values::swingHaptics, nullptr},
     {"pc_media", &Values::pcMedia, nullptr},
     {"single_hand_yank_percent", nullptr, &Values::singleHandYankPercent},
-    {"shared_shadows", &Values::sharedShadows, nullptr},
 };
 } // namespace
 std::string tabOnlyText(const Values& v) {

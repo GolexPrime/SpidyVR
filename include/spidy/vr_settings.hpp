@@ -203,12 +203,6 @@ struct Values {
     // How much speed a fast one-hand web yank adds, percent (the tab's SINGLE
     // HAND YANK STRENGTH; Swing::singleHandYankStrength): 100 as before.
     int singleHandYankPercent = 100;
-    // SHARED SHADOWS: the second eye takes the first one's sun shadow
-    // cascades (SpidyEyeShadows 1, as from October 11 to November 2), cheaper
-    // for the processor. Off, each eye renders its own (0): with them shared,
-    // shadows near the edges of the view differed between the eyes and popped
-    // in and out (the player, November 2; each eye's own fixed it).
-    bool sharedShadows = false;
     bool operator==(const Values&) const = default;
 };
 inline constexpr int eyeAimShots = 1, eyeAimZips = 2;
@@ -320,9 +314,8 @@ enum class Item : uint8_t {
     swingHaptics,
     pcMedia,
     singleHandYankStrength,
-    sharedShadows,
 };
-inline constexpr Item lastItem = Item::sharedShadows;
+inline constexpr Item lastItem = Item::singleHandYankStrength;
 // Where a row shows: in the tab; on the pause menu's first page instead,
 // under RESUME: VR VIEW (the user, October 15: "move the VIEW: GAME SCREEN to
 // the first menu (the one with resume)"); or only in the launcher's options:
@@ -345,7 +338,7 @@ struct Row {
     std::span<const char* const> choices{};
     Place place{};
 };
-const std::array<Row, 71>& rows();
+const std::array<Row, 70>& rows();
 // The most choices a row shows (game_menu's buffers): a row with more would
 // lose its last ones.
 inline constexpr size_t maxChoices = 9;

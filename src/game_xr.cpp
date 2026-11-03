@@ -1399,9 +1399,6 @@ DWORD WINAPI run(void*) {
             rig.automaticFlips(realisticFlips(values));
             native_hud::setSize(values.hud);
             native_gpu::wantHudLayer(values.steadyHud && values.hud > 0);
-            // SHARED SHADOWS, at the next frame; --own-shadows (options 0x20000) keeps each eye's own.
-            SpidyEyeShadows(reinterpret_cast<void*>(
-                static_cast<uintptr_t>(!(config.options & 0x20000) && values.sharedShadows ? 1 : 0)));
             near_clip::set(values.nearClipMm);
             recording_fov::set(values.recordingFov);
             recording_fov::smoothing(values.recordingSmoothing);
@@ -3900,8 +3897,8 @@ DWORD WINAPI run(void*) {
                         check(SpidyEyeTemporal(reinterpret_cast<void*>(static_cast<uintptr_t>(
                                   (antialiased ? config.upscale | 7u << 8 : 100u) | reflections))),
                               "Eye anti-aliasing");
-                        check(SpidyEyeShadows(reinterpret_cast<void*>(static_cast<uintptr_t>(
-                                  !(config.options & 0x20000) && values.sharedShadows ? 1 : 0))),
+                        check(SpidyEyeShadows(reinterpret_cast<void*>(
+                                  static_cast<uintptr_t>((config.options & 0x20000) ? 0 : 1))),
                               "Eye shadows");
                         check(SpidyMonitorRate(reinterpret_cast<void*>(static_cast<uintptr_t>(config.monitorRate))),
                               "Monitor rate");
