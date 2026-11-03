@@ -807,7 +807,7 @@ int main() {
             {"WEB STYLE", "REALISTIC", "ARCADE"},          {"SWING SPEED LIMIT", "32 M/S", "47 M/S"},
             {"SMOOTH TURN", "OFF", "90\xC2\xB0/S"},        {"WEB HAPTICS", "ON", "OFF"},
             {"UI STYLE", "COMIC", "TECH"},                 {"NEAR CLIP", "2 CM", "1 CM"},
-            {"ANGULAR DRAG", "VERY SLOW", "QUICK"}};
+            {"ANGULAR DRAG (EXP)", "VERY SLOW", "QUICK"}};
         check(profileChanges(profileOf(change), PlaySettings{}) == expected,
               "the changes, in the tab's order");
         const auto adjustable =

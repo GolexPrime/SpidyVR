@@ -323,14 +323,18 @@ inline constexpr Item lastItem = Item::singleHandYankStrength;
 // and dies away (the user, October 25: "cleanup the redundant"). The tab's
 // RESET ALL leaves the last two alone.
 enum class Place : uint8_t { tab, page, launcher };
-// The SPIDY VR tab, top to bottom: a section's heading (item none) or a
-// setting. The sections: WEBS, SWINGING, COMFORT, HAPTICS, DISPLAY, BODY and
-// EXPERIMENTAL (the player, October 19: "sort the options in spidy vr
-// settings ingame into nice sections"; HAPTICS since October 20, the
-// controllers' vibration and the bHaptics rows together). A setting without choices is an ON/OFF switch, the game's own;
-// one with choices steps through them. Titles are upper case, as the game's
-// own rows are; the help shows beside the rows while the setting is selected.
-// A row shown elsewhere (Place) stands where it would be in the tab.
+// Spidy's tabs in the game's Settings, top to bottom, one after another: a
+// section's heading (item none) or a setting (tabs() says where each tab
+// starts). Four tabs by theme since November 3 (GolexPrime: "our settings
+// menu is massively overloaded, and some groupings make no sense"): SPIDY VR
+// the headset and the picture, SPIDY WEBS shooting and swinging, SPIDY MOVES
+// walls, flips and combat, SPIDY FEEL haptics and sound. An experimental
+// setting stands with its theme, (EXP) after its title. A setting without
+// choices is an ON/OFF switch, the game's own; one with choices steps
+// through them. Titles are upper case, as the game's own rows are; the help
+// (what a setting is for, then what it does) shows beside the rows while the
+// setting is selected. A row shown elsewhere (Place) stands where it would
+// be in its tab.
 struct Row {
     Item item{};
     const char* title{};
@@ -338,7 +342,16 @@ struct Row {
     std::span<const char* const> choices{};
     Place place{};
 };
-const std::array<Row, 70>& rows();
+const std::array<Row, 77>& rows();
+// A tab of rows(): its name on the game's tab bar, its heading, and its rows
+// [first, end), the first a section's heading.
+struct Tab {
+    const char* name{};
+    const char* heading{};
+    size_t first{}, end{};
+};
+inline constexpr size_t tabCount = 4;
+const std::array<Tab, tabCount>& tabs();
 // The most choices a row shows (game_menu's buffers): a row with more would
 // lose its last ones.
 inline constexpr size_t maxChoices = 9;
