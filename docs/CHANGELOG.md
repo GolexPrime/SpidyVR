@@ -3,7 +3,22 @@
 Every build, newest first, with what changed, why, and what was measured.
 Per-check results are in [VALIDATION.md](VALIDATION.md).
 
-**Latest build (November 2): pull request #55 by ImStillDead - SINGLE HAND
+**Latest build (November 3): a web held through a stutter of the headset's
+stream stays held.**
+
+- In the player's session of November 3 (11:59) Virtual Desktop held a frame
+  for a tenth of a second 13 times in play, and 5 of those let go of a held
+  web within 0.15 s - about one would by chance. The game's own steps ran
+  on through every one, and the hands stayed tracked: the web went as a let
+  go of its button. After such a frame (or a gap shorter than a long break)
+  a web button let go now counts once it has stayed let go for 0.15 s
+  (`stutterGripSeconds`, `GameTrackingRig`); a let go in smooth play is at
+  once, as before, and a stutter never presses a button.
+- Measured: the session report's stalls (`xr_ms`) set against the swing
+  samples' webs; core test "a web button let go as a stream stutter ends
+  counts only once it stays let go". Not yet tried in the headset.
+
+**Earlier build (November 2): pull request #55 by ImStillDead - SINGLE HAND
 YANK STRENGTH, how much speed a one-hand web yank adds.**
 
 - **SINGLE HAND YANK STRENGTH** (SWINGING, before TWO HAND WEB ZIP; the

@@ -5768,6 +5768,40 @@ int main() {
         out=rig.update(f,{},{0,0,-1},true);
         check(out.active&&out.releaseWebs&&!out.swing.hands[0].tracked,"a long break kept the webs");
     });
+    test("a web button let go as a stream stutter ends counts only once it stays let go", [] {
+        constexpr std::int64_t ms=1'000'000;
+        const auto grace=static_cast<std::int64_t>(stutterGripSeconds*1000)*ms;
+        GameTrackingRig rig;auto f=trackedFrame();
+        f.predictedDisplayTime=1000*ms;rig.update(f,{},{0,0,-1},true);
+        f.predictedDisplayTime+=11*ms;rig.update(f,{},{0,0,-1},true);
+        // Virtual Desktop holds a frame for a tenth of a second (over .1 s:
+        // the rig cannot place it), and the next reads the grip let go.
+        f.predictedDisplayTime+=101*ms;f.seconds=.101f;
+        check(!rig.update(f,{},{0,0,-1},true).active,"the stalled frame was placed");
+        f.predictedDisplayTime+=11*ms;f.seconds=1.f/90;f.hands[0].squeeze=0;
+        auto out=rig.update(f,{},{0,0,-1},true);
+        check(out.active&&!out.releaseWebs&&out.swing.hands[0].tracked&&out.swing.hands[0].grip>.35f,
+              "the stutter let go of the web");
+        check(out.swing.hands[1].grip==1,"the other hand changed");
+        // Still let go once the moment has passed: it is let go.
+        f.predictedDisplayTime+=grace;
+        out=rig.update(f,{},{0,0,-1},true);
+        check(out.swing.hands[0].grip==0,"a real let-go was held past the moment");
+        // A stall the rig placed (just under .1 s) holds the grip as well.
+        f.hands[0].squeeze=1;f.predictedDisplayTime+=11*ms;rig.update(f,{},{0,0,-1},true);
+        f.predictedDisplayTime+=90*ms;f.seconds=.09f;f.hands[0].squeeze=0;
+        out=rig.update(f,{},{0,0,-1},true);
+        check(out.active&&out.swing.hands[0].grip>.35f,"a placed long frame let go of the web");
+        // Without a stutter a let-go is at once.
+        f.hands[0].squeeze=1;f.seconds=1.f/90;f.predictedDisplayTime+=grace+11*ms;rig.update(f,{},{0,0,-1},true);
+        f.predictedDisplayTime+=11*ms;rig.update(f,{},{0,0,-1},true);
+        f.predictedDisplayTime+=11*ms;f.hands[0].squeeze=0;
+        check(rig.update(f,{},{0,0,-1},true).swing.hands[0].grip==0,"a let-go in smooth play was delayed");
+        // A grip pressed through a stutter is not invented: let go before it, it stays let go.
+        f.predictedDisplayTime+=101*ms;f.seconds=.101f;rig.update(f,{},{0,0,-1},true);
+        f.predictedDisplayTime+=11*ms;f.seconds=1.f/90;
+        check(rig.update(f,{},{0,0,-1},true).swing.hands[0].grip==0,"a stutter pressed the grip");
+    });
     test("WEB BUTTON: TRIGGER swaps each hand's web button and reel, and a change lets go of the webs", [] {
         auto f=trackedFrame();
         f.hands[0].trigger=.9f;f.hands[0].squeeze=.1f;f.hands[1].trigger=.2f;f.hands[1].squeeze=.7f;
