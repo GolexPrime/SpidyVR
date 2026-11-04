@@ -283,6 +283,8 @@ template <class V> auto switchOf(Item item, V& v) -> decltype(&v.aimMarkers) {
         return &v.joystickRunCamera;
     case Item::halfPunchDamage:
         return &v.halfPunchDamage;
+    case Item::webTie:
+        return &v.webTie;
     case Item::view:
         return &v.flatScreen;
     case Item::realisticFlips:
@@ -353,9 +355,9 @@ Values sanitized(Values v) {
     v.automaticHandThreshold = std::clamp(v.automaticHandThreshold, 50, 300);
     return v;
 }
-const std::array<Row, 77>& rows() {
+const std::array<Row, 78>& rows() {
     // The help fits the game's description column beside the rows.
-    static const std::array<Row, 77> all{{
+    static const std::array<Row, 78> all{{
         {Item::none, "SCREEN AND HUD", nullptr, {}},
         {Item::view, "VR VIEW", "Play in VR, or the game as it is on a 3D screen, with pad controls.", viewChoices, Place::page},
         {Item::screenSize, "GAME SCREEN SIZE", "Size of the flat screen for menus, cutscenes and GAME SCREEN mode.", screenChoices},
@@ -419,6 +421,7 @@ const std::array<Row, 77>& rows() {
         {Item::none, "COMBAT", nullptr, {}},
         {Item::combatVisuals, "COMBAT VISUALS", "Punch arrows, target rings, combo effects. OFF also frees combo directions.", {}},
         {Item::halfPunchDamage, "HALF PUNCH DAMAGE (EXP)", "Your punches and web strikes deal half damage, so fights last longer.", {}},
+        {Item::webTie, "WEB TIE (EXP)", "Web an enemy up, web a wall: hands together, click the right stick. He sticks.", {}},
         {Item::automaticCombat, "FLIPS IN COMBAT (EXP)", "OFF: with enemies near, your arms and webs stop spinning you, you stay upright.", {}},
         {Item::none, "CONTROLLERS", nullptr, {}},
         {Item::haptics, "CONTROLLER VIBRATION", "How strongly webs, grabs and punches buzz in your hands. OFF: none.", hapticChoices},
@@ -440,8 +443,8 @@ const std::array<Tab, tabCount>& tabs() {
     static const std::array<Tab, tabCount> all{{
         {"SPIDY VR", "SPIDY VR: HEADSET AND PICTURE", 0, 20},
         {"SPIDY WEBS", "SPIDY WEBS: SHOOTING AND SWINGING", 20, 42},
-        {"SPIDY MOVES", "SPIDY MOVES: WALLS, FLIPS AND COMBAT", 42, 64},
-        {"SPIDY FEEL", "SPIDY FEEL: HAPTICS AND SOUND", 64, 77},
+        {"SPIDY MOVES", "SPIDY MOVES: WALLS, FLIPS AND COMBAT", 42, 65},
+        {"SPIDY FEEL", "SPIDY FEEL: HAPTICS AND SOUND", 65, 78},
     }};
     return all;
 }
@@ -623,6 +626,7 @@ constexpr TabOnly tabOnly[] = {
     {"swing_haptics", &Values::swingHaptics, nullptr},
     {"pc_media", &Values::pcMedia, nullptr},
     {"single_hand_yank_percent", nullptr, &Values::singleHandYankPercent},
+    {"web_tie", &Values::webTie, nullptr},
 };
 } // namespace
 std::string tabOnlyText(const Values& v) {
