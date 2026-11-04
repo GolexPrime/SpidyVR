@@ -2141,9 +2141,7 @@ def main():
                         "in percent of the game's own distance, 145 m (50-400; default 200, 150 before November 1). "
                         "More costs a little frame rate, video memory and room in the scene's slot pool")
     p.add_argument('--no-eye-pacing', action='store_true',
-                   help='The game draws eye pairs as fast as it can, as builds before November 1 did; without it '
-                        'it draws one pair a headset frame, each begun at the same point of the frame (no pairs '
-                        'the headset never shows, no uneven steps in what moves)')
+                   help="Kept for older command lines: the tab's EYE PACING switches pacing, in play")
     p.add_argument('--eye-lens-distances', action='store_true',
                    help="The eyes keep the distances their own wide lenses give the game, as builds before "
                         'October 19 did: models get their detail, people and props appear and textures sharpen '
@@ -2246,12 +2244,6 @@ def main():
                         "(Virtual Desktop, then one whose VR service runs, then Windows' active runtime)")
     p.add_argument('--stop-event', help='Named event that stops VR as Ctrl+C does (for a launcher window)')
     a = p.parse_args()
-    # Personal build: the game draws as fast as it can unless SPIDY_EYE_PACING=1 (GolexPrime's RTX 4080 SUPER
-    # at 2496 x 2688 and 90 Hz, November 4: 93-95 new pairs a second unpaced, 81-84 paced).
-    import os
-    if os.environ.get('SPIDY_EYE_PACING', '').strip() != '1':
-        a.no_eye_pacing = True
-    print('Eye pacing: ' + ('off (SPIDY_EYE_PACING=1 turns it on)' if a.no_eye_pacing else 'on'), flush=True)
     if a.stop_after and (a.seconds or not 5<=a.stop_after<=300):
         p.error('--stop-after requires --seconds 0 and a value from 5 to 300')
     if (a.seconds!=0 and not 2 <= a.seconds <= 25) or (a.size!=0 and not 64 <= a.size <= MAX_EYE_SIZE) or \
@@ -2485,10 +2477,8 @@ def session(a, startup):
         # The far buildings' full models, while the left eye chooses them for the game's resting view.
         if call_remote(process, xr['SpidyImpostorReach'], a.building_reach):
             print(f'WARNING: the building reach {a.building_reach}% was refused; the eyes keep 150%.', flush=True)
-        # One eye pair a headset frame (native_pace.hpp), unless asked for the game's own frame rate.
-        if not a.no_eye_pacing and call_remote(process, xr['SpidyEyePacing'], 1):
-            print('WARNING: the game could not be paced by the headset; it draws pairs as fast as it can.',
-                  flush=True)
+        # One eye pair a headset frame (native_pace.hpp): the tab's EYE PACING switches it, in play
+        # (game_xr applies it at every change of the settings), off by default.
         started = time.monotonic()
         # What this sampling costs: the launcher's own processor time, each pass's reading of the game, and
         # the call into the game that keeps VR alive (a thread made in the game once a second).

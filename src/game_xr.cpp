@@ -497,6 +497,7 @@ __declspec(dllexport) flip_reprojection::Data SpidyReprojectData;
 DWORD WINAPI SpidyStart(void*);
 DWORD WINAPI SpidyEyeTemporal(void*);
 DWORD WINAPI SpidyEyeShadows(void*);
+DWORD WINAPI SpidyEyePacing(void*);
 DWORD WINAPI SpidyMonitorRate(void*);
 DWORD WINAPI SpidyStop(void*);
 DWORD WINAPI SpidySetEyes(void*);
@@ -1440,6 +1441,8 @@ DWORD WINAPI run(void*) {
             // SHARED SHADOWS, at the next frame; --own-shadows (options 0x20000) keeps each eye's own.
             SpidyEyeShadows(reinterpret_cast<void*>(
                 static_cast<uintptr_t>(!(config.options & 0x20000) && values.sharedShadows ? 1 : 0)));
+            // EYE PACING, from the next frame: the tab switches it in play.
+            SpidyEyePacing(reinterpret_cast<void*>(static_cast<uintptr_t>(values.eyePacing ? 1 : 0)));
             near_clip::set(values.nearClipMm);
             recording_fov::set(values.recordingFov);
             recording_fov::smoothing(values.recordingSmoothing);
@@ -4121,6 +4124,9 @@ DWORD WINAPI run(void*) {
                         check(SpidyEyeShadows(reinterpret_cast<void*>(static_cast<uintptr_t>(
                                   !(config.options & 0x20000) && values.sharedShadows ? 1 : 0))),
                               "Eye shadows");
+                        check(SpidyEyePacing(reinterpret_cast<void*>(
+                                  static_cast<uintptr_t>(values.eyePacing ? 1 : 0))),
+                              "Eye pacing");
                         check(SpidyMonitorRate(reinterpret_cast<void*>(static_cast<uintptr_t>(config.monitorRate))),
                               "Monitor rate");
                         NativeConfig views{

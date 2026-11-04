@@ -214,6 +214,11 @@ struct Values {
     // shadows near the edges of the view differed between the eyes and popped
     // in and out (the player, November 2; each eye's own fixed it).
     bool sharedShadows = false;
+    // EYE PACING: one game frame a headset frame (SpidyEyePacing 1,
+    // native_pace.hpp), from the next frame. Off by default here: on an RTX
+    // 4080 SUPER just able to draw 90 pairs a second it cost a tenth of the
+    // new pairs (GolexPrime, November 4: 81-84 paced, 85-95 unpaced).
+    bool eyePacing = false;
     bool operator==(const Values&) const = default;
 };
 inline constexpr int eyeAimShots = 1, eyeAimZips = 2;
@@ -327,8 +332,9 @@ enum class Item : uint8_t {
     singleHandYankStrength,
     webTie,
     sharedShadows,
+    eyePacing,
 };
-inline constexpr Item lastItem = Item::sharedShadows;
+inline constexpr Item lastItem = Item::eyePacing;
 // Where a row shows: in the tab; on the pause menu's first page instead,
 // under RESUME: VR VIEW (the user, October 15: "move the VIEW: GAME SCREEN to
 // the first menu (the one with resume)"); or only in the launcher's options:
@@ -355,7 +361,7 @@ struct Row {
     std::span<const char* const> choices{};
     Place place{};
 };
-const std::array<Row, 79>& rows();
+const std::array<Row, 80>& rows();
 // A tab of rows(): its name on the game's tab bar, its heading, and its rows
 // [first, end), the first a section's heading.
 struct Tab {

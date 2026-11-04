@@ -3,7 +3,8 @@
 Every build, newest first, with what changed, why, and what was measured.
 Per-check results are in [VALIDATION.md](VALIDATION.md).
 
-**Latest build (November 4, personal): eye pacing off unless asked for.**
+**Latest build (November 4, personal): EYE PACING in the tab, off by default,
+and the realistic flips' fine tuning in the game.**
 
 - Measured with `tools/probe_vr_swing.py` on GolexPrime's RTX 4080 SUPER
   (eyes 2496 x 2688, 90 Hz, the game's own swing, 60 s a phase): paced, 81-84
@@ -12,9 +13,18 @@ Per-check results are in [VALIDATION.md](VALIDATION.md).
   headset frame. Paced pairs were fresher (23 ms against 33 ms, median) but
   no steadier (the age's spread 22.5 ms both ways). The far buildings' reach
   (150% or 200%) made no difference.
-- `run_game_vr.py` now draws as fast as the game can unless the environment
-  variable `SPIDY_EYE_PACING=1` is set (the launcher passes its environment
-  on); the session's console says which.
+- **EYE PACING (EXP)**, a switch in the SPIDY VR tab under PERFORMANCE AND
+  SMOOTHNESS, after SHARED SHADOWS: off by default, switched in play from the
+  next frame (game_xr applies it with the other settings; `eye_pacing` in
+  spidy_vr.ini). `run_game_vr.py` no longer turns pacing on itself;
+  `--no-eye-pacing` is kept for older command lines.
+- **The realistic flips' fine tuning in the game too:** MINIMUM FLIGHT SPEED,
+  ROTATION RESPONSE, ANGULAR DRAG (how quickly a spin dies out) and MINIMUM
+  HAND SPEED were the launcher's alone (October 25, to keep the one tab
+  short); with four tabs they are rows of SPIDY MOVES under REALISTIC FLIPS
+  again, and still in the launcher.
+- Checked: 781 core tests, 38 launcher checks, the six Python suites. Not
+  tried in the headset.
 
 **Earlier build (November 3): the in-game settings in four pages by theme,
 in the one SPIDY VR tab.** GolexPrime: "our settings menu is massively

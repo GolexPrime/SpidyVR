@@ -8826,6 +8826,20 @@ int main() {
             near(actual.velocity.y,1.8f*inert().zipMultiplier,.01f);
         }
     });
+    test("EYE PACING: a switch after SHARED SHADOWS in the SPIDY VR tab, off by default, kept as eye_pacing", [] {
+        using namespace vr_settings;
+        Values v;
+        const auto& row = rowFor(Item::eyePacing);
+        check(row.item == Item::eyePacing && &row == &rowFor(Item::sharedShadows) + 1 && row.choices.empty() &&
+                  row.place == Place::tab && &row < rows().data() + tabs()[0].end,
+              "EYE PACING: a switch after SHARED SHADOWS, in the SPIDY VR tab");
+        check(!v.eyePacing && defaultChoice(Item::eyePacing) == 0, "eye pacing on by default");
+        check(choose(Item::eyePacing, 1, v) && v.eyePacing && choice(Item::eyePacing, v) == 1,
+              "the switch did not turn it on");
+        check(tabOnlyText(v).find("eye_pacing=1\n") != std::string::npos &&
+                  withTabOnly({}, "eye_pacing=1\n").eyePacing && !withTabOnly({}, "eye_pacing=0\n").eyePacing,
+              "spidy_vr.ini does not keep EYE PACING as eye_pacing");
+    });
     test("SHARED SHADOWS: a switch after STEADY HUD, off by default, kept as shared_shadows", [] {
         using namespace vr_settings;
         Values v;
@@ -22112,19 +22126,12 @@ int main() {
         check(rowFor(Item::view).item == Item::view && std::strcmp(rowFor(Item::view).title, "VR VIEW") == 0 && rowFor(Item::view).choices.size() == 2 &&
                   std::strcmp(rowFor(Item::view).choices[0], "VR") == 0 && std::strcmp(rowFor(Item::view).choices[1], "GAME SCREEN") == 0,
               "the view above the game screen's rows: VR, or GAME SCREEN");
-        // VR VIEW is on the pause menu's first page, beside RESUME, and no other row is; the realistic
-        // flips' thresholds and how a spin builds and dies away are the launcher's alone (the user,
-        // October 25: "cleanup the redundant"). The other rows are the tab's.
-        for (const auto& row : all) {
-            const bool launcherOnly =
-                row.item == Item::automaticMinimumSpeed || row.item == Item::automaticResponse ||
-                row.item == Item::automaticFalloff || row.item == Item::automaticHandThreshold;
-            check(row.place == (row.item == Item::view ? Place::page
-                                : launcherOnly           ? Place::launcher
-                                                         : Place::tab),
-                  "a row in the wrong place");
-        }
-        check(std::count_if(all.begin(), all.end(), [](const Row& r) { return r.place == Place::tab; }) == 74,
+        // VR VIEW is on the pause menu's first page, beside RESUME, and no other row is. The realistic
+        // flips' thresholds and how a spin builds and dies away are back in the tab with the four tabs
+        // (GolexPrime, November 4: ANGULAR DRAG and the others missing in the game); the other rows too.
+        for (const auto& row : all)
+            check(row.place == (row.item == Item::view ? Place::page : Place::tab), "a row in the wrong place");
+        check(std::count_if(all.begin(), all.end(), [](const Row& r) { return r.place == Place::tab; }) == 79,
               "the tab's own rows");
         check(rowFor(Item::webStyle).item == Item::webStyle && std::strcmp(rowFor(Item::webStyle).title, "WEB STYLE") == 0 &&
                   rowFor(Item::webStyle).choices.size() == 2 && std::strcmp(rowFor(Item::webStyle).choices[0], "REALISTIC") == 0 &&
@@ -22380,7 +22387,7 @@ int main() {
                                        "slingshot_speed=0\nrecording_smoothing=0\n"
                                        "two_hand_zip=0\nrope_steering=0\nweb_range_m=100\nweb_speed=0\n"
                                        "flip_reprojection=0\nsteady_hud=0\nreel_haptics=0\nswing_haptics=0\n"
-                                       "pc_media=0\nsingle_hand_yank_percent=100\nweb_tie=0\nshared_shadows=0\n",
+                                       "pc_media=0\nsingle_hand_yank_percent=100\nweb_tie=0\nshared_shadows=0\neye_pacing=0\n",
               "the defaults' text");
         Values changed = defaults;
         changed.recordingFov = 140;

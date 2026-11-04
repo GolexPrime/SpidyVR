@@ -317,6 +317,8 @@ template <class V> auto switchOf(Item item, V& v) -> decltype(&v.aimMarkers) {
         return &v.steadyHud;
     case Item::sharedShadows:
         return &v.sharedShadows;
+    case Item::eyePacing:
+        return &v.eyePacing;
     default:
         return nullptr;
     }
@@ -357,9 +359,9 @@ Values sanitized(Values v) {
     v.automaticHandThreshold = std::clamp(v.automaticHandThreshold, 50, 300);
     return v;
 }
-const std::array<Row, 79>& rows() {
+const std::array<Row, 80>& rows() {
     // The help fits the game's description column beside the rows.
-    static const std::array<Row, 79> all{{
+    static const std::array<Row, 80> all{{
         {Item::none, "SCREEN AND HUD", nullptr, {}},
         {Item::view, "VR VIEW", "Play in VR, or the game as it is on a 3D screen, with pad controls.", viewChoices, Place::page},
         {Item::screenSize, "GAME SCREEN SIZE", "Size of the flat screen for menus, cutscenes and GAME SCREEN mode.", screenChoices},
@@ -374,6 +376,7 @@ const std::array<Row, 79>& rows() {
         {Item::flipReprojection, "FLIP REPROJECTION (EXP)", "Less judder in flips, spins and smooth turns. Best at 72 Hz.", {}},
         {Item::steadyHud, "STEADY HUD (EXP)", "Stops the HUD from shaking when the game drops frames. Draws over your hands.", {}},
         {Item::sharedShadows, "SHARED SHADOWS", "Both eyes use one eye's sun shadows: faster, but they can differ at the edges.", {}},
+        {Item::eyePacing, "EYE PACING (EXP)", "Paces the game to the headset: fresher frames, but fewer if your PC is near 90.", {}},
         {Item::none, "BODY", nullptr, {}},
         {Item::calibrate, "CALIBRATE BODY", "Fit Spider-Man to you: ON RESUME, resume, then T-pose holding both triggers.", calibrateChoices},
         {Item::height, "HEIGHT", "Your height, for Spider-Man's size and SEATED. AUTO measures you in the headset.", heightChoices},
@@ -414,12 +417,12 @@ const std::array<Row, 79>& rows() {
         {Item::realisticFlips, "REALISTIC FLIPS (EXP)", "Your arms and webs spin your body with real momentum. The rows below tune it.", {}},
         {Item::automaticStrength, "ROTATION STRENGTH (EXP)", "How strongly your body turns toward the web's pull.", automaticStrengthChoices},
         {Item::automaticSpeed, "MAX ROTATION SPEED (EXP)", "Top speed of automatic spins, flips on letting go included.", automaticSpeedChoices},
-        {Item::automaticMinimumSpeed, "MINIMUM FLIGHT SPEED (EXP)", "Automatic spins only start above this speed.", automaticMinimumChoices, Place::launcher},
+        {Item::automaticMinimumSpeed, "MINIMUM FLIGHT SPEED (EXP)", "Automatic spins only start above this speed.", automaticMinimumChoices},
         {Item::automaticReleaseFlip, "SWING MOMENTUM (EXP)", "Keep the swing's spin after letting go of your last web.", {}},
-        {Item::automaticResponse, "ROTATION RESPONSE (EXP)", "How gently spins speed up and slow down. Longer is gentler.", automaticResponseChoices, Place::launcher},
+        {Item::automaticResponse, "ROTATION RESPONSE (EXP)", "How gently spins speed up and slow down. Longer is gentler.", automaticResponseChoices},
         {Item::automaticHandStrength, "HAND MOMENTUM (EXP)", "How much swinging your arms in the air adds to your spin.", automaticHandStrengthChoices},
-        {Item::automaticFalloff, "ANGULAR DRAG (EXP)", "How quickly a spin dies out on its own.", automaticFalloffChoices, Place::launcher},
-        {Item::automaticHandThreshold, "MINIMUM HAND SPEED (EXP)", "Slower arm movements than this add no spin.", automaticHandThresholdChoices, Place::launcher},
+        {Item::automaticFalloff, "ANGULAR DRAG (EXP)", "How quickly a spin dies out on its own.", automaticFalloffChoices},
+        {Item::automaticHandThreshold, "MINIMUM HAND SPEED (EXP)", "Slower arm movements than this add no spin.", automaticHandThresholdChoices},
         {Item::automaticAirBrake, "AIR ROTATION BRAKE (EXP)", "Press A in the air to stop spinning and come smoothly upright.", {}},
         {Item::none, "COMBAT", nullptr, {}},
         {Item::combatVisuals, "COMBAT VISUALS", "Punch arrows, target rings, combo effects. OFF also frees combo directions.", {}},
@@ -444,10 +447,10 @@ const std::array<Row, 79>& rows() {
 }
 const std::array<Tab, tabCount>& tabs() {
     static const std::array<Tab, tabCount> all{{
-        {"SPIDY VR", "SPIDY VR: HEADSET AND PICTURE", 0, 21},
-        {"SPIDY WEBS", "SPIDY WEBS: SHOOTING AND SWINGING", 21, 43},
-        {"SPIDY MOVES", "SPIDY MOVES: WALLS, FLIPS AND COMBAT", 43, 66},
-        {"SPIDY FEEL", "SPIDY FEEL: HAPTICS AND SOUND", 66, 79},
+        {"SPIDY VR", "SPIDY VR: HEADSET AND PICTURE", 0, 22},
+        {"SPIDY WEBS", "SPIDY WEBS: SHOOTING AND SWINGING", 22, 44},
+        {"SPIDY MOVES", "SPIDY MOVES: WALLS, FLIPS AND COMBAT", 44, 67},
+        {"SPIDY FEEL", "SPIDY FEEL: HAPTICS AND SOUND", 67, 80},
     }};
     return all;
 }
@@ -631,6 +634,7 @@ constexpr TabOnly tabOnly[] = {
     {"single_hand_yank_percent", nullptr, &Values::singleHandYankPercent},
     {"web_tie", &Values::webTie, nullptr},
     {"shared_shadows", &Values::sharedShadows, nullptr},
+    {"eye_pacing", &Values::eyePacing, nullptr},
 };
 } // namespace
 std::string tabOnlyText(const Values& v) {
