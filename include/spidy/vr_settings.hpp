@@ -84,6 +84,11 @@ struct Values {
     // Experimental physical hand pulls, solid palms and crawling body poses.
     bool handClimb = false;
     bool halfPunchDamage = false; // half health damage, unchanged punch reactions
+    // The web tie (the tab's WEB TIE; web_tie.hpp, docs/WEB-TIE.md): a webbed-up
+    // enemy stuck to a wall by the hands together and the right stick's click,
+    // and a webbed enemy who comes to the player only on the yank
+    // (GrabConfig::yankOnlyCharacters). Off by default: both as before.
+    bool webTie = false;
     // The wall-floor camera transition during HAND WALL CLIMBING's joystick
     // runs (the tab's JOYSTICK WALL RUN CAMERA), as before pull request #38;
     // off, the left stick drives the momentum wall run's view and gait.
@@ -320,6 +325,7 @@ enum class Item : uint8_t {
     swingHaptics,
     pcMedia,
     singleHandYankStrength,
+    webTie,
     sharedShadows,
 };
 inline constexpr Item lastItem = Item::sharedShadows;
@@ -345,7 +351,7 @@ struct Row {
     std::span<const char* const> choices{};
     Place place{};
 };
-const std::array<Row, 71>& rows();
+const std::array<Row, 72>& rows();
 // The most choices a row shows (game_menu's buffers): a row with more would
 // lose its last ones.
 inline constexpr size_t maxChoices = 9;

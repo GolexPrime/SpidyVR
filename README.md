@@ -65,6 +65,11 @@ one **START VR** button.
 - **Grab and throw.** Web a prop or an enemy, reel or yank it in, swing it on
   the web and let go to throw it. Heavy things feel heavy. Pulled enemies fly
   flailing, and get hurt when they slam into walls, the ground or each other.
+- **Web them to the wall.** With **WEB TIE** on (EXPERIMENTAL in the SPIDY VR
+  settings), web an enemy up, put one web on a wall (the floor, a lamp post,
+  a crate) and the other on him, bring your hands together and click the
+  right stick: he is pulled onto it and stays stuck there until the fight is
+  over ([web tie](docs/WEB-TIE.md)).
 - **Punch across the room.** A fast fist into an enemy lands the game's own
   melee hit, harder the faster you swing. Throw one at an enemy up to 10 m
   away and you fly in and strike. Uppercut an enemy into the air and keep
@@ -90,7 +95,10 @@ one **START VR** button.
   Settings for aim markers, snap or smooth turning, vibration, swing speed,
   how heavy you swing, screen size, the HUD and more. Changes apply at once.
 - **Menus and cutscenes on a screen.** Cutscenes in 3D: the game draws
-  them once for each eye. The Touch controllers work as an Xbox controller
+  them once for each eye. Or turn on **First-person cutscenes** in the
+  launcher: scenes then play all round you from inside Spider-Man's head,
+  with CUTSCENE HEAD TRACKING choosing whether your head or the scene's own
+  camera aims the view. The Touch controllers work as an Xbox controller
   there; VR resumes when play does. **SWITCH TO GAME SCREEN** in the pause
   menu plays the game as it is on that screen, whenever you like.
 - **One launcher.** It checks the game, the headset and your PC, fixes what it

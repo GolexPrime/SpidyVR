@@ -238,6 +238,31 @@ int main() {
         options.arcadeWebs = true;
         args = sessionArguments(options, L"r.json", L"", L"");
         check(args.size() == 8 && args[7] == L"--arcade-webs", "arcade webs chosen");
+        options = {};
+        check(!options.firstPersonCutscenes && options.cutsceneHeadTracking,
+              "first-person cutscenes off, with head tracking, in a new launcher");
+        args = sessionArguments(options, L"r.json", L"", L"");
+        check(args.size() == 7, "a session with the cutscenes on the screen is told nothing of them");
+        options.firstPersonCutscenes = true;
+        args = sessionArguments(options, L"r.json", L"", L"");
+        check(args.size() == 8 && args[7] == L"--first-person-cutscenes", "first-person cutscenes chosen");
+        options.cutsceneHeadTracking = false;
+        args = sessionArguments(options, L"r.json", L"", L"");
+        check(args.size() == 9 && args[7] == L"--first-person-cutscenes" && args[8] == L"--no-cutscene-head-tracking",
+              "first-person cutscenes aimed by the scene's own camera");
+        options.firstPersonCutscenes = false;
+        args = sessionArguments(options, L"r.json", L"", L"");
+        check(args.size() == 7, "head tracking is said only with first-person cutscenes");
+        check(!options.disableTheater, "the theater screen stays in a new launcher");
+        options.disableTheater = true;
+        args = sessionArguments(options, L"r.json", L"", L"");
+        check(args.size() == 8 && args[7] == L"--disable-theater-screen", "theater screen disabled, without first person");
+        options.firstPersonCutscenes = true;
+        options.cutsceneHeadTracking = true;
+        args = sessionArguments(options, L"r.json", L"", L"");
+        check(args.size() == 9 && args[7] == L"--first-person-cutscenes" && args[8] == L"--disable-theater-screen",
+              "theater screen disabled, with first person");
+        options = {};
         // The view turning onto a wall is no option of its own: it turns whoever holds the player there (the
         // player, October 14: "i like how it feel to walk on building and stand on their side"). Nor, since
         // October 25, are the swing's own walls: off, the game's crawl took every wall, and walls are Spidy's
@@ -668,6 +693,7 @@ int main() {
         t.wallRunCameraTilt = false;
         t.joystickRunCamera = false;
         t.halfPunchDamage = true;
+        t.webTie = true;
         t.singleHandYankPercent = 200;
         t.uiStyle = 1;
         t.combatVisuals = false;
@@ -707,7 +733,7 @@ int main() {
                   "body_haptics=100\nbody_haptics_webs=1\nbody_haptics_wind=1\n"
                   "body_haptics_combat=1\nbody_haptics_movement=1\nscreen_size=1\nscreen_depth=2\nhud=2\n"
                   "ui_style=0\ncombat_visuals=1\nnear_clip_mm=20\nseated=0\nflips=0\ncontrolled_flips=0\nflip_speed=180\nhand_climb=0\n"
-                  "joystick_wall_run_camera=1\nwall_run_camera_tilt=1\nhalf_punch_damage=0\n"
+                  "joystick_wall_run_camera=1\nwall_run_camera_tilt=1\nhalf_punch_damage=0\nweb_tie=0\n"
                   "wall_distance_cm=25\n"
                   "realistic_flips=0\nrotation_strength=50\nrotation_speed=240\nflight_speed_min=3\n"
                   "swing_momentum=1\nrotation_response_ms=500\nhand_momentum=100\nangular_drag_ms=3000\n"

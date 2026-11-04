@@ -134,13 +134,14 @@ AddItemFn originalAddItem{};
 uintptr_t imageBase{};
 SRWLOCK lock = SRWLOCK_INIT;
 vr_settings::Values shown;
-// Bits 1 << Item changed in the tab and not taken yet. 64 of them: the haptics'
-// groups took Item past 31, where a 32-bit shift is undefined (x86 wraps it
-// onto another setting's bit).
-// The rows changed in the tab and not taken yet, a bit for each setting (64
-// of them since LANDING JUMP: one word no longer holds them).
-using Items = std::bitset<static_cast<size_t>(vr_settings::lastItem) + 1>;
-Items pending{};
+// A bit per Item changed in the tab and not taken yet, one for every value an
+// Item can have: a 32-bit mask overflowed once the haptics' groups took Item
+// past 31 (x86 wrapped the shift onto another setting's bit), and a 64-bit
+// one ended at Item 63 (WEB TIE is 64).
+constexpr size_t itemBits = size_t{1} << (8 * sizeof(Item));
+using ItemBits = std::bitset<itemBits>;
+ItemBits pending;
+static_assert(static_cast<size_t>(vr_settings::lastItem) < itemBits, "more settings than pending's bits");
 std::atomic<uint64_t> tabsBuilt{}, changesMade{};
 std::atomic<uint32_t> failure{};
 std::atomic<bool> hooked{}, created{};
@@ -596,7 +597,8 @@ bool matches(uintptr_t at, const unsigned char* bytes, size_t count) {
         return false;
     }
 }
-vr_settings::Values copyItems(const vr_settings::Values& from, vr_settings::Values to, const Items& which) {
+vr_settings::Values copyItems(const vr_settings::Values& from, vr_settings::Values to,
+                              const ItemBits& which) {
     for (unsigned i = 1; i <= static_cast<unsigned>(vr_settings::lastItem); ++i)
         if (which.test(i))
             vr_settings::choose(static_cast<Item>(i), vr_settings::choice(static_cast<Item>(i), from), to);
@@ -651,7 +653,7 @@ void game_menu::publish(const vr_settings::Values& values) {
 }
 bool game_menu::take(vr_settings::Values& values) {
     AcquireSRWLockExclusive(&lock);
-    const Items which = pending;
+    const ItemBits which = pending;
     if (which.any())
         values = copyItems(shown, values, which);
     pending.reset();
