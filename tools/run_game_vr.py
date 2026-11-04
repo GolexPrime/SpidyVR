@@ -2246,6 +2246,12 @@ def main():
                         "(Virtual Desktop, then one whose VR service runs, then Windows' active runtime)")
     p.add_argument('--stop-event', help='Named event that stops VR as Ctrl+C does (for a launcher window)')
     a = p.parse_args()
+    # Personal build: the game draws as fast as it can unless SPIDY_EYE_PACING=1 (GolexPrime's RTX 4080 SUPER
+    # at 2496 x 2688 and 90 Hz, November 4: 93-95 new pairs a second unpaced, 81-84 paced).
+    import os
+    if os.environ.get('SPIDY_EYE_PACING', '').strip() != '1':
+        a.no_eye_pacing = True
+    print('Eye pacing: ' + ('off (SPIDY_EYE_PACING=1 turns it on)' if a.no_eye_pacing else 'on'), flush=True)
     if a.stop_after and (a.seconds or not 5<=a.stop_after<=300):
         p.error('--stop-after requires --seconds 0 and a value from 5 to 300')
     if (a.seconds!=0 and not 2 <= a.seconds <= 25) or (a.size!=0 and not 64 <= a.size <= MAX_EYE_SIZE) or \

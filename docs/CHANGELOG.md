@@ -3,7 +3,20 @@
 Every build, newest first, with what changed, why, and what was measured.
 Per-check results are in [VALIDATION.md](VALIDATION.md).
 
-**Latest build (November 3): the in-game settings in four pages by theme,
+**Latest build (November 4, personal): eye pacing off unless asked for.**
+
+- Measured with `tools/probe_vr_swing.py` on GolexPrime's RTX 4080 SUPER
+  (eyes 2496 x 2688, 90 Hz, the game's own swing, 60 s a phase): paced, 81-84
+  new pairs a second at 75% GPU; unpaced, 85-95 at 81%. A game just able to
+  draw 90 waits about 4 ms on one frame in four and then misses the next
+  headset frame. Paced pairs were fresher (23 ms against 33 ms, median) but
+  no steadier (the age's spread 22.5 ms both ways). The far buildings' reach
+  (150% or 200%) made no difference.
+- `run_game_vr.py` now draws as fast as the game can unless the environment
+  variable `SPIDY_EYE_PACING=1` is set (the launcher passes its environment
+  on); the session's console says which.
+
+**Earlier build (November 3): the in-game settings in four pages by theme,
 in the one SPIDY VR tab.** GolexPrime: "our settings menu is massively
 overloaded, and some groupings make no sense": BLOW SOUNDS and PC MEDIA under
 HAPTICS, COMBAT VISUALS (which changes the combo rules) under DISPLAY, and an
