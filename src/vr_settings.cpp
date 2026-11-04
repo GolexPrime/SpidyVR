@@ -315,6 +315,8 @@ template <class V> auto switchOf(Item item, V& v) -> decltype(&v.aimMarkers) {
         return &v.flipReprojection;
     case Item::steadyHud:
         return &v.steadyHud;
+    case Item::sharedShadows:
+        return &v.sharedShadows;
     default:
         return nullptr;
     }
@@ -355,9 +357,9 @@ Values sanitized(Values v) {
     v.automaticHandThreshold = std::clamp(v.automaticHandThreshold, 50, 300);
     return v;
 }
-const std::array<Row, 78>& rows() {
+const std::array<Row, 79>& rows() {
     // The help fits the game's description column beside the rows.
-    static const std::array<Row, 78> all{{
+    static const std::array<Row, 79> all{{
         {Item::none, "SCREEN AND HUD", nullptr, {}},
         {Item::view, "VR VIEW", "Play in VR, or the game as it is on a 3D screen, with pad controls.", viewChoices, Place::page},
         {Item::screenSize, "GAME SCREEN SIZE", "Size of the flat screen for menus, cutscenes and GAME SCREEN mode.", screenChoices},
@@ -371,6 +373,7 @@ const std::array<Row, 78>& rows() {
         {Item::none, "PERFORMANCE AND SMOOTHNESS", nullptr, {}},
         {Item::flipReprojection, "FLIP REPROJECTION (EXP)", "Less judder in flips, spins and smooth turns. Best at 72 Hz.", {}},
         {Item::steadyHud, "STEADY HUD (EXP)", "Stops the HUD from shaking when the game drops frames. Draws over your hands.", {}},
+        {Item::sharedShadows, "SHARED SHADOWS", "Both eyes use one eye's sun shadows: faster, but they can differ at the edges.", {}},
         {Item::none, "BODY", nullptr, {}},
         {Item::calibrate, "CALIBRATE BODY", "Fit Spider-Man to you: ON RESUME, resume, then T-pose holding both triggers.", calibrateChoices},
         {Item::height, "HEIGHT", "Your height, for Spider-Man's size and SEATED. AUTO measures you in the headset.", heightChoices},
@@ -441,10 +444,10 @@ const std::array<Row, 78>& rows() {
 }
 const std::array<Tab, tabCount>& tabs() {
     static const std::array<Tab, tabCount> all{{
-        {"SPIDY VR", "SPIDY VR: HEADSET AND PICTURE", 0, 20},
-        {"SPIDY WEBS", "SPIDY WEBS: SHOOTING AND SWINGING", 20, 42},
-        {"SPIDY MOVES", "SPIDY MOVES: WALLS, FLIPS AND COMBAT", 42, 65},
-        {"SPIDY FEEL", "SPIDY FEEL: HAPTICS AND SOUND", 65, 78},
+        {"SPIDY VR", "SPIDY VR: HEADSET AND PICTURE", 0, 21},
+        {"SPIDY WEBS", "SPIDY WEBS: SHOOTING AND SWINGING", 21, 43},
+        {"SPIDY MOVES", "SPIDY MOVES: WALLS, FLIPS AND COMBAT", 43, 66},
+        {"SPIDY FEEL", "SPIDY FEEL: HAPTICS AND SOUND", 66, 79},
     }};
     return all;
 }
@@ -627,6 +630,7 @@ constexpr TabOnly tabOnly[] = {
     {"pc_media", &Values::pcMedia, nullptr},
     {"single_hand_yank_percent", nullptr, &Values::singleHandYankPercent},
     {"web_tie", &Values::webTie, nullptr},
+    {"shared_shadows", &Values::sharedShadows, nullptr},
 };
 } // namespace
 std::string tabOnlyText(const Values& v) {

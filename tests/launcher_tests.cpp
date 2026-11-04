@@ -579,7 +579,7 @@ int main() {
                                  row.item == Item::height || row.item == Item::recordingFov ||
                                  row.item == Item::eyeAim || row.item == Item::recordingSmoothing ||
                                  row.item == Item::flipReprojection ||
-                                 row.item == Item::steadyHud;
+                                 row.item == Item::steadyHud || row.item == Item::sharedShadows;
             check(std::count_if(begin, end, [&](const ProfileSetting& s) { return s.item == row.item; }) ==
                       (leftOut ? 0 : 1),
                   row.title);
@@ -590,7 +590,8 @@ int main() {
         for (size_t line = 0; line < tabOnly.size(); line = tabOnly.find('\n', line) + 1) {
             const std::string key = tabOnly.substr(line, tabOnly.find('=', line) - line);
             if (key == "recording_fov" || key == "recording_smoothing" || key == "height_cm" ||
-                key == "eye_aim" || key == "flip_reprojection" || key == "steady_hud")
+                key == "eye_aim" || key == "flip_reprojection" || key == "steady_hud" ||
+                key == "shared_shadows")
                 continue;
             ++lines;
             check(at(key) < std::size(profileSettings) &&

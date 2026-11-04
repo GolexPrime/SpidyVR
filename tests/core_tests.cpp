@@ -59,6 +59,7 @@
 #include "spidy/tech_marks.hpp"
 #include "spidy/throw_aim.hpp"
 #include "spidy/vd_eyes.hpp"
+#include <bitset>
 #include <algorithm>
 #include <bitset>
 #include <cstring>
@@ -8824,6 +8825,24 @@ int main() {
             check(zips==1,"repeated physics samples interrupted or repeated the yank");
             near(actual.velocity.y,1.8f*inert().zipMultiplier,.01f);
         }
+    });
+    test("SHARED SHADOWS: a switch after STEADY HUD, off by default, kept as shared_shadows", [] {
+        using namespace vr_settings;
+        Values v;
+        const auto& all = rows();
+        const auto& shared = rowFor(Item::sharedShadows);
+        check(shared.item == Item::sharedShadows && &shared == &rowFor(Item::steadyHud) + 1 &&
+                  std::strcmp(shared.title, "SHARED SHADOWS") == 0 && shared.choices.empty() &&
+                  shared.place == Place::tab && &shared < all.data() + tabs()[0].end,
+              "SHARED SHADOWS: a switch after STEADY HUD, in the SPIDY VR tab");
+        check(!v.sharedShadows && defaultChoice(Item::sharedShadows) == 0, "shared shadows on by default");
+        check(choose(Item::sharedShadows, 1, v) && v.sharedShadows && choice(Item::sharedShadows, v) == 1,
+              "the switch did not turn it on");
+        check(tabOnlyText(v).find("shared_shadows=1\n") != std::string::npos &&
+                  withTabOnly({}, "shared_shadows=1\n").sharedShadows &&
+                  !withTabOnly({}, "shared_shadows=0\n").sharedShadows &&
+                  !withTabOnly({}, "eye_shadows=1\n").sharedShadows,
+              "spidy_vr.ini does not keep SHARED SHADOWS as shared_shadows");
     });
     test("native landing keeps a short point launch window and pre-impact direction", [] {
         TestWorld world;
@@ -22105,7 +22124,7 @@ int main() {
                                                          : Place::tab),
                   "a row in the wrong place");
         }
-        check(std::count_if(all.begin(), all.end(), [](const Row& r) { return r.place == Place::tab; }) == 73,
+        check(std::count_if(all.begin(), all.end(), [](const Row& r) { return r.place == Place::tab; }) == 74,
               "the tab's own rows");
         check(rowFor(Item::webStyle).item == Item::webStyle && std::strcmp(rowFor(Item::webStyle).title, "WEB STYLE") == 0 &&
                   rowFor(Item::webStyle).choices.size() == 2 && std::strcmp(rowFor(Item::webStyle).choices[0], "REALISTIC") == 0 &&
@@ -22361,7 +22380,7 @@ int main() {
                                        "slingshot_speed=0\nrecording_smoothing=0\n"
                                        "two_hand_zip=0\nrope_steering=0\nweb_range_m=100\nweb_speed=0\n"
                                        "flip_reprojection=0\nsteady_hud=0\nreel_haptics=0\nswing_haptics=0\n"
-                                       "pc_media=0\nsingle_hand_yank_percent=100\nweb_tie=0\n",
+                                       "pc_media=0\nsingle_hand_yank_percent=100\nweb_tie=0\nshared_shadows=0\n",
               "the defaults' text");
         Values changed = defaults;
         changed.recordingFov = 140;

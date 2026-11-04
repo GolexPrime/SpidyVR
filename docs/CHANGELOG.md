@@ -143,6 +143,33 @@ swinging I very often lose the web, as if it were cut or I let go".
 - **Tests.** Core: the clock over a two second hitch, and the held grip
   outliving a 1.5 s hitch but not half a second of frames without input.
 
+**Earlier build (November 2): SHARED SHADOWS, off by default.**
+GolexPrime: "often the shadows show differently in the left and the right
+eye, which looks very odd once your head puts them together in 3D", small
+shadows mostly near the edges of the view, and some that pop in and out.
+
+- **Why.** Since October 11 the second eye took the first one's sun shadow
+  cascades (`submitScene`, `SpidyEyeShadows` 1), fitted to the lens covering
+  both eyes. A first headset test build had four steps: the sun's (as
+  before), also the light set (lamps' shadows, bit 2), also the `+30` part
+  (bit 4), and each eye its own (0). Each eye's own fixed both the edges and
+  the popping; the other two made no difference. Likely (not confirmed in
+  the game's code): which objects cast a shadow into the shared cascades is
+  still chosen by the first eye's view alone, so what only the second eye
+  sees at its edge has none.
+- **SHARED SHADOWS** (EXPERIMENTAL after STEADY HUD, the launcher's display
+  card, `shared_shadows` in `spidy_vr.ini`; not in settings profiles, like
+  STEADY HUD): on, the sun's cascades are shared as before; off, the
+  default now, each eye renders its own. That costs the processor what
+  sharing saved (October 11: 79 to 87 frames a second turning where the
+  processor was the limit). It takes effect at the next frame;
+  `--own-shadows` still keeps it off.
+- **The 64th setting.** The in-game tab's changes not taken yet were a bit
+  each in one 64-bit word, settings 1 to 63; they are a `std::bitset` sized
+  by the settings now (`game_menu.cpp`, and the tab test's own).
+- **Tests.** Core: the switch, off by default, saved as `shared_shadows`;
+  launcher: kept out of profiles.
+
 **Earlier build (November 2): pull request #55 by ImStillDead - SINGLE HAND
 YANK STRENGTH, how much speed a one-hand web yank adds.**
 
