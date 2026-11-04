@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(Spidy VERSION 0.7.0 LANGUAGES C CXX)
+project(Spidy VERSION 0.8.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -33,7 +33,7 @@ function(spidy_stamp_version target description)
                              SPIDY_MODULE_FILETYPE=${filetype})
 endfunction()
 
-add_library(spidy_core src/swing.cpp src/web_grab.cpp src/lab_world.cpp src/lab_props.cpp src/game_tracking.cpp
+add_library(spidy_core src/swing.cpp src/web_grab.cpp src/web_tie.cpp src/lab_world.cpp src/lab_props.cpp src/game_tracking.cpp
             src/web_visual.cpp src/body_ik.cpp src/punch.cpp src/shooter.cpp src/vr_settings.cpp
             src/body_calibration.cpp src/overlay_text.cpp src/slow_motion.cpp src/web_strike.cpp
             src/impact_sound.cpp src/prompt_buttons.cpp src/gadget_wheel.cpp src/spider_sense.cpp src/phone.cpp
@@ -90,7 +90,7 @@ if(SPIDY_BUILD_OBSERVER)
   target_compile_options(spidy_view PRIVATE /W4 /permissive-)
   target_link_libraries(spidy_view PRIVATE minhook)
   add_library(spidy_stereo_probe SHARED src/stereo_probe.cpp src/native_eye_gpu.cpp src/native_webs.cpp
-              src/native_body.cpp src/native_hud.cpp)
+              src/native_body.cpp src/native_hud.cpp src/game_fp.cpp)
   target_include_directories(spidy_stereo_probe PRIVATE include)
   target_compile_definitions(spidy_stereo_probe PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
   target_compile_options(spidy_stereo_probe PRIVATE /W4 /permissive-)
